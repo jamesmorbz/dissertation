@@ -9,6 +9,8 @@ import {
   IconLogs,
 } from "@tabler/icons-react";
 import { Link, useMatchRoute } from "@tanstack/react-router";
+import cx from "clsx";
+import * as styles from "./Sidebar.css";
 
 interface NavbarLinkProps {
   icon: Icon;
@@ -21,8 +23,12 @@ function NavbarLink({ url, icon: Icon, label }: NavbarLinkProps) {
   const matcesRoute = useMatchRoute();
   return (
     <Tooltip label={label} position="right">
-      <Link to={url}>
-        <Icon size="1.5rem" stroke={1.5} />
+      <Link to={url}
+      className={cx(styles.link, {
+        [styles.active]: matcesRoute({ to: url, fuzzy: true }),
+      })}
+    >
+        <Icon size="2.5rem" stroke={1} />
       </Link>
     </Tooltip>
   );
@@ -32,7 +38,6 @@ const linksdata = [
   { icon: IconChartHistogram, label: "Dashboard", url: "/dashboard" },
   { icon: IconDatabase, label: "Data Explorer", url: "/data-explorer" },
   { icon: IconDevices, label: "Devices", url: "/devices" },
-  { icon: IconDeviceRemote, label: "Controller", url: "/controller" },
   { icon: IconLogs, label: "Logs", url: "/logs" },
 ];
 
@@ -52,7 +57,7 @@ export function SideBar() {
         <Stack justify="center" gap={0}>
           <NavbarLink
             icon={IconSettings}
-            label={"Settings"}
+            label="Settings"
             url="/settings"
           />
         </Stack>

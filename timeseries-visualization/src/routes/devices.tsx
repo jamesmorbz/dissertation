@@ -1,5 +1,6 @@
+import DevicesPage from "@/components/devices/DevicesPage";
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/devices')({
-  component: () => <div>Hello /devices!</div>
+  component: DevicesPage
 })

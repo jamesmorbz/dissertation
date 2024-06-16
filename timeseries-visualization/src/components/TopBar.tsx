@@ -1,6 +1,6 @@
-import { Box, Button, Center, Group, Image, Menu, Text } from "@mantine/core";
+import { ActionIcon, Box, Button, Center, Group, Image, Menu, Text } from "@mantine/core";
 import * as classes from "./TopBar.css";
-
+import { IconRefresh } from "@tabler/icons-react";
 import { useColorScheme } from "@mantine/hooks";
 
 type MenuAction = {
@@ -83,7 +83,10 @@ function TopBar({ menuActions }: { menuActions: MenuGroup[] }) {
                             //   onClick={() => appWindow.minimize()}
                             className={classes.icon}
                         >
-                            <h3>TR1</h3>
+                            <ActionIcon onClick={() => console.log("Refresh whole DOM")}>
+                                <IconRefresh/>
+                            </ActionIcon>
+                           
                             {/* You might want to put something in the top right. Replace the above if you do */}
                         </Center>
                     </Group>

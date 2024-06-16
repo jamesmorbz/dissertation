@@ -36,15 +36,25 @@ function RootLayout() {
 
     const menuActions: MenuGroup[] = [
         {
-          label: "Help",
+          label: "Docs",
           options: [
             {
-                label: "About",
-                id: "about",
+                label: "Docs",
+                id: "docs",
                 action: () => setOpened(true),
             }
           ],
-        }
+        },
+        {
+            label: "Help",
+            options: [
+              {
+                  label: "About",
+                  id: "about",
+                  action: () => setOpened(true),
+              }
+            ],
+          }
     ];
 
 return (

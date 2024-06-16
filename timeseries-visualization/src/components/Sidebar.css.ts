@@ -9,13 +9,12 @@ export const link = style({
   borderRight: "3px solid transparent",
   justifyContent: "center",
   color: "#373A40",
-
   ":hover": {
       color: "#373A40",
   }
 });
 
 export const active = style({
-  borderLeftColor: "#373A40",
-  color: "#373A40",
+  borderLeftColor: "#FFFFFF",
+  color: "#48E1FF",
 });

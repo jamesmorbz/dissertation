@@ -16,7 +16,6 @@ import { Route as LogsImport } from './routes/logs'
 import { Route as DevicesImport } from './routes/devices'
 import { Route as DataExplorerImport } from './routes/data-explorer'
 import { Route as DashboardImport } from './routes/dashboard'
-import { Route as ControllerImport } from './routes/controller'
 
 // Create/Update Routes
 
@@ -45,22 +44,10 @@ const DashboardRoute = DashboardImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const ControllerRoute = ControllerImport.update({
-  path: '/controller',
-  getParentRoute: () => rootRoute,
-} as any)
-
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/controller': {
-      id: '/controller'
-      path: '/controller'
-      fullPath: '/controller'
-      preLoaderRoute: typeof ControllerImport
-      parentRoute: typeof rootRoute
-    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -102,7 +89,6 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 export const routeTree = rootRoute.addChildren({
-  ControllerRoute,
   DashboardRoute,
   DataExplorerRoute,
   DevicesRoute,
@@ -118,16 +104,12 @@ export const routeTree = rootRoute.addChildren({
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/controller",
         "/dashboard",
         "/data-explorer",
         "/devices",
         "/logs",
         "/settings"
       ]
-    },
-    "/controller": {
-      "filePath": "controller.tsx"
     },
     "/dashboard": {
       "filePath": "dashboard.tsx"
