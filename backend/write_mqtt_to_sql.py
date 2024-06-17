@@ -65,7 +65,7 @@ def on_message(client, userdata, msg):
         return
     
     message = {
-        'topic': msg.topic,
+        'topic': msg.topic.split("/")[1],
         'payload': payload
     }
     logging.info(json.dumps(message))

@@ -19,10 +19,10 @@ import {
     IconSignalE,
     IconPower
   } from "@tabler/icons-react";
-  import { useState } from "react";
   import * as classes from "./styles.css";
-  
-  interface DeviceProps {
+  import axios from "axios";
+
+export interface DeviceProps {
     name: string;
     hardware_name: string;
     device_type: string;
@@ -31,8 +31,20 @@ import {
     uptime_seconds: number | null;
     wifi_ssid: string;
     wifi_rssi: string;
-  }
+}
   
+
+async function togglePower(hardware_name: string) {
+    try {
+      console.log(`Calling http://127.0.0.1:8000/device/${hardware_name}/TOGGLE_POWER`)
+      const response = await axios.put(`http://127.0.0.1:8000/device/${hardware_name}/TOGGLE_POWER`); // Could pop up a toast notification?
+      // In future this could become a POST with a {"COMMAND": "TOGGLE_POWER"} as we could extend
+      // the device/XXXXXX/ endpoint to not only power on and off the plug but do other things (like update message interval)
+    } catch (error) {
+      console.error("Error Calling Endpoint", error);
+    }
+};
+
 export function Device({
     name,
     hardware_name,
@@ -44,15 +56,12 @@ export function Device({
     wifi_rssi,
   }: DeviceProps) {
   
-    const [loading, setLoading] = useState(false);
-    const [progress, setProgress] = useState<number | null>(null);
-  
     return (
       <Card shadow="sm" padding="lg" radius="md" withBorder className={classes.card}>
         <Group style={{ marginBottom: 5 }}>
           <Text size="lg">{name}</Text>
-          <Badge color={status === 'online' ? 'green' : 'red'}>
-            {status === 'online' ? <IconCheck size={14} /> : <IconX size={14} />}
+          <Badge color={status === 'ON' ? 'green' : 'red'}>
+            {status === 'ON' ? <IconCheck size={14} /> : <IconX size={14} />}
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </Badge>
         </Group>
@@ -78,22 +87,19 @@ export function Device({
             <IconSignalE size={16} />
             <Text>RSSI: {wifi_rssi} dBm</Text>
           </Group>
-          {loading && <Loader size="sm" />}
-          {progress !== null && <Progress value={progress} />}
         </Stack>
   
-        <Group>
-          <ActionIcon onClick={() => setLoading(!loading)}>
-            <IconPower size={18} />
+        <Group className={classes.powerIcon}>
+          <ActionIcon onClick={() => togglePower(hardware_name)}>
+            <IconPower size={20}/>
           </ActionIcon>
         </Group>
 
-        <Text mt="xs" size="xs" c="dimmed" ta="right">
-        <IconClock size={16} />
+        <Text className={classes.lastUpdated}>
+        <IconClock size={20} />
             Last Updated: {new Date(last_updated).toLocaleString()}
         </Text>
         
-
       </Card>
     );
   }

@@ -31,6 +31,7 @@
     "@vanilla-extract/vite-plugin": "^4.0.11",
     "@vitejs/plugin-react": "^4.3.1",
     "@vitejs/plugin-react-swc": "^3.7.0",
+    "axios": "^1.7.2",
     "classnames": "^2.5.1",
     "d3": "^7.9.0",
     "dayjs": "^1.11.11",

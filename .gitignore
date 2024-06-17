@@ -27,3 +27,5 @@ lerna-debug.log*
 .vscode
 *.db
 
+venv
+__pycache__
