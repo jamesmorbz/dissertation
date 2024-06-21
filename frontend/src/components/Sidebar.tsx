@@ -4,7 +4,7 @@ import {
   IconChartHistogram,
   IconDatabase,
   IconDevices,
-  IconDeviceRemote,
+  IconCalendarClock,
   IconSettings,
   IconLogs,
 } from "@tabler/icons-react";
@@ -38,6 +38,7 @@ const linksdata = [
   { icon: IconChartHistogram, label: "Dashboard", url: "/dashboard" },
   { icon: IconDatabase, label: "Data Explorer", url: "/data-explorer" },
   { icon: IconDevices, label: "Devices", url: "/devices" },
+  { icon: IconCalendarClock, label: "Scheduler", url: "/scheduler" },
   { icon: IconLogs, label: "Logs", url: "/logs" },
 ];
 

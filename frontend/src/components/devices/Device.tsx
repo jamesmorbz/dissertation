@@ -73,7 +73,7 @@ export function Device({
           </Group>
           <Group>
             <IconPlug size={16} />
-            <Text>{device_type}</Text>
+             <Text>??</Text> {/*{device_type} */}
           </Group>
           <Group>
             <IconClock size={16} />
@@ -93,6 +93,10 @@ export function Device({
           <ActionIcon onClick={() => togglePower(hardware_name)}>
             <IconPower size={20}/>
           </ActionIcon>
+          <ActionIcon onClick={() => console.log("force refresh device status")}>
+            <IconRefresh size={20}/>
+          </ActionIcon>
+          
         </Group>
 
         <Text className={classes.lastUpdated}>

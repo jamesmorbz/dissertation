@@ -10,7 +10,7 @@ export const link = style({
   justifyContent: "center",
   color: "#373A40",
   ":hover": {
-      color: "#373A40",
+      color: "#EE00FF",
   }
 });
 

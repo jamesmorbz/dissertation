@@ -12,6 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as SettingsImport } from './routes/settings'
+import { Route as SchedulerImport } from './routes/scheduler'
 import { Route as LogsImport } from './routes/logs'
 import { Route as DevicesImport } from './routes/devices'
 import { Route as DataExplorerImport } from './routes/data-explorer'
@@ -21,6 +22,11 @@ import { Route as DashboardImport } from './routes/dashboard'
 
 const SettingsRoute = SettingsImport.update({
   path: '/settings',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const SchedulerRoute = SchedulerImport.update({
+  path: '/scheduler',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -76,6 +82,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LogsImport
       parentRoute: typeof rootRoute
     }
+    '/scheduler': {
+      id: '/scheduler'
+      path: '/scheduler'
+      fullPath: '/scheduler'
+      preLoaderRoute: typeof SchedulerImport
+      parentRoute: typeof rootRoute
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -93,6 +106,7 @@ export const routeTree = rootRoute.addChildren({
   DataExplorerRoute,
   DevicesRoute,
   LogsRoute,
+  SchedulerRoute,
   SettingsRoute,
 })
 
@@ -108,6 +122,7 @@ export const routeTree = rootRoute.addChildren({
         "/data-explorer",
         "/devices",
         "/logs",
+        "/scheduler",
         "/settings"
       ]
     },
@@ -122,6 +137,9 @@ export const routeTree = rootRoute.addChildren({
     },
     "/logs": {
       "filePath": "logs.tsx"
+    },
+    "/scheduler": {
+      "filePath": "scheduler.tsx"
     },
     "/settings": {
       "filePath": "settings.tsx"
