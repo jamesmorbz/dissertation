@@ -6,29 +6,32 @@ from typing import Optional
 
 router = APIRouter()
 
+
 @dataclass
 class DatabaseStatus:
     status: str
     database_version: str
 
+
 @dataclass
 class DatabaseMetrics:
     rows: int
-    size: int 
+    size: int
     transactions: int
-    latency: float 
+    latency: float
     connections: int
     read_operations: int
     write_operations: int
     cache_hit_ratio: float
-    uptime: float 
+    uptime: float
     errors: int
-    locking_info: Optional[str]  
-    cpu_usage: float 
-    memory_usage: int  
-    disk_io: int 
+    locking_info: Optional[str]
+    cpu_usage: float
+    memory_usage: int
+    disk_io: int
     index_usage: Optional[str]
     replication_lag: Optional[float]
+
 
 @dataclass
 class BackendStatus:
@@ -37,12 +40,15 @@ class BackendStatus:
     python_version: str
     database_version: str
 
+
 @dataclass
 class HealthCheck:
     status: str = "OK"
 
+
 # Endpoint to perform a healthcheck on. This endpoint can primarily be used Docker
 # to ensure a robust container orchestration and management is in place.
+
 
 @router.get("/", response_model=BackendStatus)
 async def read_root():
@@ -50,8 +56,9 @@ async def read_root():
         "message": "For interactive documentation, please visit /docs",
         "fastapi_version": fastapi.__version__,
         "python_version": sys.version,
-        "database_version": "TBC"
+        "database_version": "TBC",
     }
+
 
 @router.get(
     "/health",
@@ -64,6 +71,7 @@ async def read_root():
 def get_health() -> HealthCheck:
     return HealthCheck(status="OK")
 
+
 @router.get(
     "/db_health",
     tags=["Monitoring"],
@@ -74,6 +82,7 @@ def get_health() -> HealthCheck:
 )
 def get_db_health() -> DatabaseStatus:
     return DatabaseStatus(status="OK", database_version="0.0.0")
+
 
 @router.get(
     "/db_metrics",
@@ -98,5 +107,5 @@ def get_db_storage():
         memory_usage=524288000,
         disk_io=1048576000,
         index_usage="High usage on main index",
-        replication_lag=0.5
+        replication_lag=0.5,
     )
