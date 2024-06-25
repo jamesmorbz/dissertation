@@ -1,12 +1,9 @@
 from fastapi import APIRouter
 from pydantic.dataclasses import dataclass
-from datetime import datetime, timedelta
-import random
-from fastapi_cache.decorator import cache
+from datetime import datetime
 import sqlite3
 from dataclasses import field
 from typing import List
-import logging
 from fastapi.encoders import jsonable_encoder
 
 router = APIRouter()

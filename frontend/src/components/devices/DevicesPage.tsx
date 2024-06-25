@@ -10,7 +10,7 @@ function DevicesPage() {
     const fetchData = async () => {
       try {
         const response = await axios.get<DeviceProps[]>(
-          "http://127.0.0.1:8000/devices"
+          "http://127.0.0.1:8000/devices/current_state",
         );
         setDevices(response.data);
       } catch (error) {

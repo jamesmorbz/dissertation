@@ -42,12 +42,12 @@ const RuleTable: React.FC<RuleTableProps> = ({
 
   const toggleFilter = (
     filter: string,
-    setFilters: React.Dispatch<React.SetStateAction<string[]>>
+    setFilters: React.Dispatch<React.SetStateAction<string[]>>,
   ) => {
     setFilters((prevFilters) =>
       prevFilters.includes(filter)
         ? prevFilters.filter((f) => f !== filter)
-        : [...prevFilters, filter]
+        : [...prevFilters, filter],
     );
     showNotification({
       title: "Filter updated",
@@ -63,7 +63,7 @@ const RuleTable: React.FC<RuleTableProps> = ({
     setDayFilters((prevFilters) =>
       prevFilters.includes(filter)
         ? prevFilters.filter((f) => f !== filter)
-        : [...prevFilters, filter]
+        : [...prevFilters, filter],
     );
     showNotification({
       title: "Filter updated",
@@ -103,14 +103,14 @@ const RuleTable: React.FC<RuleTableProps> = ({
         (timeFilter) =>
           (timeFilter === "Morning" &&
             parseInt(rule.time.split(":")[0]) < 12) ||
-          (timeFilter === "Evening" && parseInt(rule.time.split(":")[0]) >= 12)
+          (timeFilter === "Evening" && parseInt(rule.time.split(":")[0]) >= 12),
       );
 
     return deviceMatch && dayMatch && timeMatch;
   });
 
   const deviceNames = Array.from(
-    new Set(rules.map((rule) => rule.device_name))
+    new Set(rules.map((rule) => rule.device_name)),
   );
   const daysOfWeek = Object.values(Schedule);
 

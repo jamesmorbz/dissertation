@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
 from datetime import datetime, timedelta
 import random
 from pydantic.dataclasses import dataclass

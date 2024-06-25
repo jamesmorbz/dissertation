@@ -76,7 +76,7 @@ function TopBar({ menuActions }: { menuActions: MenuGroup[] }) {
                         >
                           {option.label}
                         </Menu.Item>
-                      )
+                      ),
                     )}
                   </Menu.Dropdown>
                 </Menu>

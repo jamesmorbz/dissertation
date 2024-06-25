@@ -36,10 +36,10 @@ export interface DeviceProps {
 async function togglePower(hardware_name: string) {
   try {
     console.log(
-      `Calling http://127.0.0.1:8000/device/${hardware_name}/TOGGLE_POWER`
+      `Calling http://127.0.0.1:8000/controller/${hardware_name}/TOGGLE_POWER`,
     );
     const response = await axios.put(
-      `http://127.0.0.1:8000/device/${hardware_name}/TOGGLE_POWER`
+      `http://127.0.0.1:8000/controller/${hardware_name}/TOGGLE_POWER`,
     ); // Could pop up a toast notification?
     // In future this could become a POST with a {"COMMAND": "TOGGLE_POWER"} as we could extend
     // the device/XXXXXX/ endpoint to not only power on and off the plug but do other things (like update message interval)
@@ -70,7 +70,7 @@ export function Device({
         <Text size="lg">{name}</Text>
         <Badge color={status === "ON" ? "green" : "red"}>
           {status === "ON" ? <IconCheck size={14} /> : <IconX size={14} />}
-          {status.charAt(0).toUpperCase() + status.slice(1)}
+          {status}
         </Badge>
       </Group>
 

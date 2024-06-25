@@ -55,7 +55,7 @@ const expandedMockLogs = Array(10)
     logs.map((log: { id: number }) => ({
       ...log,
       id: log.id + i * mockLogs.length,
-    }))
+    })),
   );
 
 const LogsPage: React.FC = () => {
@@ -128,7 +128,7 @@ const LogsPage: React.FC = () => {
   const totalPages = Math.ceil(totalLogs / rowsPerPage);
   const paginatedLogs = filteredLogs.slice(
     (activePage - 1) * rowsPerPage,
-    activePage * rowsPerPage
+    activePage * rowsPerPage,
   );
 
   return (

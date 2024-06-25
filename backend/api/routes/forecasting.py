@@ -1,9 +1,5 @@
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from datetime import datetime, timedelta
-import random
+from fastapi import APIRouter
 from pydantic.dataclasses import dataclass
-from typing import List
 
 router = APIRouter()
 

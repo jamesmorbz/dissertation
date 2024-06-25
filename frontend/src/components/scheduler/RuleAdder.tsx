@@ -37,7 +37,7 @@ const RuleAdder: React.FC<AddRuleFormProps> = ({ onAddRule }) => {
     setSchedule((prevSchedule) =>
       prevSchedule.includes(day)
         ? prevSchedule.filter((d) => d !== day)
-        : [...prevSchedule, day]
+        : [...prevSchedule, day],
     );
   };
 

@@ -23,11 +23,12 @@ function NavbarLink({ url, icon: Icon, label }: NavbarLinkProps) {
   const matcesRoute = useMatchRoute();
   return (
     <Tooltip label={label} position="right">
-      <Link to={url}
-      className={cx(styles.link, {
-        [styles.active]: matcesRoute({ to: url, fuzzy: true }),
-      })}
-    >
+      <Link
+        to={url}
+        className={cx(styles.link, {
+          [styles.active]: matcesRoute({ to: url, fuzzy: true }),
+        })}
+      >
         <Icon size="2.5rem" stroke={1} />
       </Link>
     </Tooltip>
@@ -56,11 +57,7 @@ export function SideBar() {
       </AppShellSection>
       <AppShellSection>
         <Stack justify="center" gap={0}>
-          <NavbarLink
-            icon={IconSettings}
-            label="Settings"
-            url="/settings"
-          />
+          <NavbarLink icon={IconSettings} label="Settings" url="/settings" />
         </Stack>
       </AppShellSection>
     </>

@@ -52,7 +52,9 @@ const SchedulePage: React.FC = () => {
 
   const handleUpdateRule = (updatedRule: Rule) => {
     setRules((prevRules) =>
-      prevRules.map((rule) => (rule.id === updatedRule.id ? updatedRule : rule))
+      prevRules.map((rule) =>
+        rule.id === updatedRule.id ? updatedRule : rule,
+      ),
     );
   };
 

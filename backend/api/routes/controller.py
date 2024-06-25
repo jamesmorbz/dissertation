@@ -1,9 +1,4 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from datetime import datetime, timedelta
-import random
-from fastapi_cache.decorator import cache
-import sqlite3
 import requests
 
 router = APIRouter()
