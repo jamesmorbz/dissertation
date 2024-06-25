@@ -29,7 +29,7 @@ function AboutModal({
       <br />
 
       <Anchor href="<APP NAME>" target="_blank" rel="noreferrer">
-        WEBSITE LINK
+        WEBSITE LINK!
       </Anchor>
     </Modal>
   );
