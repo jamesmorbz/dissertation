@@ -26,9 +26,8 @@ class DeviceStatus:
     status: str
     last_updated: str
     uptime_seconds: int
-    device_type: str
     wifi_ssid: str
-    wifi_rssi: str
+    wifi_rssi: int
 
 
 @router.get(
@@ -100,7 +99,7 @@ async def devices_current_state():
 
     device_list = [
         {
-            "name": row[0],
+            "friendly_name": row[0],
             "hardware_name": row[1],
             "device_type": row[2],
             "status": row[3],
