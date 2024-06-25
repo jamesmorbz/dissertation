@@ -1,0 +1,28 @@
+# tags_metadata.yaml
+
+- name: Base
+  description: Basic API Responses with Backend Metadata
+
+- name: Monitoring
+  description: Health check APIs
+
+- name: Metadata
+  description: Various metadata about the devices (power status, wifi strength, etc.)
+
+- name: Data
+  description: Endpoints that return power (wattage) telemetry data
+
+- name: All Devices
+  description: Bulk endpoints for that returns data for all devices
+
+- name: Device
+  description: Endpoints that return data for only a single device per request
+
+- name: Forecast
+  description: Endpoints that will return forecast (predictive) data
+
+- name: Controller
+  description: For commands that are availible for devices flashed with Tasmota
+  externalDocs:
+    description: Find more info here
+    url: https://tasmota.github.io/docs/Commands/
