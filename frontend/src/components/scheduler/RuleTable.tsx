@@ -1,8 +1,25 @@
-import React, { useState } from 'react';
-import { Table, Card, Stack, Group, Button, Menu, Badge, ActionIcon, TextInput, Select } from '@mantine/core';
-import { Rule, Schedule } from './types';
-import { IconX, IconTrash, IconEdit, IconCheck, IconStethoscope } from '@tabler/icons-react';
-import { showNotification } from '@mantine/notifications';
+import React, { useState } from "react";
+import {
+  Table,
+  Card,
+  Stack,
+  Group,
+  Button,
+  Menu,
+  Badge,
+  ActionIcon,
+  TextInput,
+  Select,
+} from "@mantine/core";
+import { Rule, Schedule } from "./types";
+import {
+  IconX,
+  IconTrash,
+  IconEdit,
+  IconCheck,
+  IconStethoscope,
+} from "@tabler/icons-react";
+import { showNotification } from "@mantine/notifications";
 
 interface RuleTableProps {
   rules: Rule[];
@@ -11,34 +28,50 @@ interface RuleTableProps {
   testRunRule: (id: number) => void;
 }
 
-const RuleTable: React.FC<RuleTableProps> = ({ rules, onDeleteRule, onUpdateRule, testRunRule }) => {
+const RuleTable: React.FC<RuleTableProps> = ({
+  rules,
+  onDeleteRule,
+  onUpdateRule,
+  testRunRule,
+}) => {
   const [deviceFilters, setDeviceFilters] = useState<string[]>([]);
   const [dayFilters, setDayFilters] = useState<Schedule[]>([]);
   const [timeFilters, setTimeFilters] = useState<string[]>([]);
   const [editingRuleId, setEditingRuleId] = useState<number | null>(null);
   const [editedRule, setEditedRule] = useState<Partial<Rule>>({});
 
-  const toggleFilter = (filter: string, setFilters: React.Dispatch<React.SetStateAction<string[]>>) => {
+  const toggleFilter = (
+    filter: string,
+    setFilters: React.Dispatch<React.SetStateAction<string[]>>
+  ) => {
     setFilters((prevFilters) =>
-      prevFilters.includes(filter) ? prevFilters.filter((f) => f !== filter) : [...prevFilters, filter]
+      prevFilters.includes(filter)
+        ? prevFilters.filter((f) => f !== filter)
+        : [...prevFilters, filter]
     );
     showNotification({
-      title: 'Filter updated',
-      message: `${filter} filter has been ${deviceFilters.includes(filter) ? 'removed' : 'added'}`,
+      title: "Filter updated",
+      message: `${filter} filter has been ${
+        deviceFilters.includes(filter) ? "removed" : "added"
+      }`,
       icon: <IconCheck size={16} />,
-      color: deviceFilters.includes(filter) ? 'red' : 'green',
+      color: deviceFilters.includes(filter) ? "red" : "green",
     });
   };
 
   const toggleDayFilter = (filter: Schedule) => {
     setDayFilters((prevFilters) =>
-      prevFilters.includes(filter) ? prevFilters.filter((f) => f !== filter) : [...prevFilters, filter]
+      prevFilters.includes(filter)
+        ? prevFilters.filter((f) => f !== filter)
+        : [...prevFilters, filter]
     );
     showNotification({
-      title: 'Filter updated',
-      message: `${filter} filter has been ${dayFilters.includes(filter) ? 'removed' : 'added'}`,
+      title: "Filter updated",
+      message: `${filter} filter has been ${
+        dayFilters.includes(filter) ? "removed" : "added"
+      }`,
       icon: <IconCheck size={16} />,
-      color: dayFilters.includes(filter) ? 'red' : 'green',
+      color: dayFilters.includes(filter) ? "red" : "green",
     });
   };
 
@@ -49,27 +82,36 @@ const RuleTable: React.FC<RuleTableProps> = ({ rules, onDeleteRule, onUpdateRule
 
   const handleSave = () => {
     if (editingRuleId !== null) {
-      onUpdateRule({ ...rules.find((rule) => rule.id === editingRuleId)!, ...editedRule });
+      onUpdateRule({
+        ...rules.find((rule) => rule.id === editingRuleId)!,
+        ...editedRule,
+      });
       setEditingRuleId(null);
       setEditedRule({});
     }
   };
 
   const filteredRules = rules.filter((rule) => {
-    const deviceMatch = !deviceFilters.length || deviceFilters.includes(rule.device_name);
-    const dayMatch = !dayFilters.length || dayFilters.some((day) => rule.schedule.includes(day));
+    const deviceMatch =
+      !deviceFilters.length || deviceFilters.includes(rule.device_name);
+    const dayMatch =
+      !dayFilters.length ||
+      dayFilters.some((day) => rule.schedule.includes(day));
     const timeMatch =
       !timeFilters.length ||
       timeFilters.some(
         (timeFilter) =>
-          (timeFilter === 'Morning' && parseInt(rule.time.split(':')[0]) < 12) ||
-          (timeFilter === 'Evening' && parseInt(rule.time.split(':')[0]) >= 12)
+          (timeFilter === "Morning" &&
+            parseInt(rule.time.split(":")[0]) < 12) ||
+          (timeFilter === "Evening" && parseInt(rule.time.split(":")[0]) >= 12)
       );
 
     return deviceMatch && dayMatch && timeMatch;
   });
 
-  const deviceNames = Array.from(new Set(rules.map((rule) => rule.device_name)));
+  const deviceNames = Array.from(
+    new Set(rules.map((rule) => rule.device_name))
+  );
   const daysOfWeek = Object.values(Schedule);
 
   return (
@@ -145,7 +187,10 @@ const RuleTable: React.FC<RuleTableProps> = ({ rules, onDeleteRule, onUpdateRule
             </Menu.Target>
             <Menu.Dropdown>
               {deviceNames.map((device) => (
-                <Menu.Item key={device} onClick={() => toggleFilter(device, setDeviceFilters)}>
+                <Menu.Item
+                  key={device}
+                  onClick={() => toggleFilter(device, setDeviceFilters)}
+                >
                   {device}
                 </Menu.Item>
               ))}
@@ -170,8 +215,16 @@ const RuleTable: React.FC<RuleTableProps> = ({ rules, onDeleteRule, onUpdateRule
               <Button radius="xl">Filter by Time</Button>
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Item onClick={() => toggleFilter('Morning', setTimeFilters)}>Morning</Menu.Item>
-              <Menu.Item onClick={() => toggleFilter('Evening', setTimeFilters)}>Evening</Menu.Item>
+              <Menu.Item
+                onClick={() => toggleFilter("Morning", setTimeFilters)}
+              >
+                Morning
+              </Menu.Item>
+              <Menu.Item
+                onClick={() => toggleFilter("Evening", setTimeFilters)}
+              >
+                Evening
+              </Menu.Item>
             </Menu.Dropdown>
           </Menu>
         </Group>
@@ -193,7 +246,12 @@ const RuleTable: React.FC<RuleTableProps> = ({ rules, onDeleteRule, onUpdateRule
                   {editingRuleId === rule.id ? (
                     <TextInput
                       value={editedRule.device_name || rule.device_name}
-                      onChange={(event) => setEditedRule({ ...editedRule, device_name: event.currentTarget.value })}
+                      onChange={(event) =>
+                        setEditedRule({
+                          ...editedRule,
+                          device_name: event.currentTarget.value,
+                        })
+                      }
                     />
                   ) : (
                     rule.device_name
@@ -203,8 +261,10 @@ const RuleTable: React.FC<RuleTableProps> = ({ rules, onDeleteRule, onUpdateRule
                   {editingRuleId === rule.id ? (
                     <Select
                       value={editedRule.action || rule.action}
-                      data={['Turn On', 'Turn Off']}
-                      onChange={(value) => setEditedRule({ ...editedRule, action: value! })}
+                      data={["Turn On", "Turn Off"]}
+                      onChange={(value) =>
+                        setEditedRule({ ...editedRule, action: value! })
+                      }
                     />
                   ) : (
                     rule.action
@@ -214,7 +274,12 @@ const RuleTable: React.FC<RuleTableProps> = ({ rules, onDeleteRule, onUpdateRule
                   {editingRuleId === rule.id ? (
                     <TextInput
                       value={editedRule.time || rule.time}
-                      onChange={(event) => setEditedRule({ ...editedRule, time: event.currentTarget.value })}
+                      onChange={(event) =>
+                        setEditedRule({
+                          ...editedRule,
+                          time: event.currentTarget.value,
+                        })
+                      }
                     />
                   ) : (
                     rule.time
@@ -223,12 +288,21 @@ const RuleTable: React.FC<RuleTableProps> = ({ rules, onDeleteRule, onUpdateRule
                 <td>
                   {editingRuleId === rule.id ? (
                     <Select
-                      value={editedRule.schedule ? editedRule.schedule[0] : rule.schedule[0]}
+                      value={
+                        editedRule.schedule
+                          ? editedRule.schedule[0]
+                          : rule.schedule[0]
+                      }
                       data={daysOfWeek}
-                      onChange={(value) => setEditedRule({ ...editedRule, schedule: [value as Schedule] })}
+                      onChange={(value) =>
+                        setEditedRule({
+                          ...editedRule,
+                          schedule: [value as Schedule],
+                        })
+                      }
                     />
                   ) : (
-                    rule.schedule.join(', ')
+                    rule.schedule.join(", ")
                   )}
                 </td>
                 <td>
@@ -241,10 +315,16 @@ const RuleTable: React.FC<RuleTableProps> = ({ rules, onDeleteRule, onUpdateRule
                       <ActionIcon color="blue" onClick={() => handleEdit(rule)}>
                         <IconEdit size={16} />
                       </ActionIcon>
-                      <ActionIcon color="red" onClick={() => onDeleteRule(rule.id)}>
+                      <ActionIcon
+                        color="red"
+                        onClick={() => onDeleteRule(rule.id)}
+                      >
                         <IconTrash size={16} />
                       </ActionIcon>
-                      <ActionIcon color="blue" onClick={() => testRunRule(rule.id)}>
+                      <ActionIcon
+                        color="blue"
+                        onClick={() => testRunRule(rule.id)}
+                      >
                         <IconStethoscope size={16} />
                       </ActionIcon>
                     </>

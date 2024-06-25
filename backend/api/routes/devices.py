@@ -50,7 +50,7 @@ async def update_device_details(device_id, device_details: DeviceDetails):
     return update_item_encoded
 
 @router.get("/current_state", response_model=List[DeviceStatus], tags=["All Devices"], summary="Get the current status of all devices")
-# @cache(expire=5) # TODO a bit aggresive?
+# @cache(expire=5) # TODO a bit aggresive??
 async def devices_current_state():
     query = '''
         WITH last_state AS (

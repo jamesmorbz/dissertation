@@ -1,8 +1,18 @@
-import React, { useState } from 'react';
-import { Table, Card, Stack, Group, Badge, Container, Button, Select, Pagination } from '@mantine/core';
-import { DateTimePicker } from '@mantine/dates';
-import { showNotification } from '@mantine/notifications';
-import { IconX } from '@tabler/icons-react';
+import React, { useState } from "react";
+import {
+  Table,
+  Card,
+  Stack,
+  Group,
+  Badge,
+  Container,
+  Button,
+  Select,
+  Pagination,
+} from "@mantine/core";
+import { DateTimePicker } from "@mantine/dates";
+import { showNotification } from "@mantine/notifications";
+import { IconX } from "@tabler/icons-react";
 
 interface LogEntry {
   id: number;
@@ -12,15 +22,40 @@ interface LogEntry {
 }
 
 const mockLogs: LogEntry[] = [
-  { id: 1, actionType: 'Rule Triggered', description: 'Turned off Living Room Light', timestamp: '2024-06-22T14:00:00' },
-  { id: 2, actionType: 'User Action', description: 'Dry run of Bedroom Heater', timestamp: '2024-06-22T14:30:00' },
-  { id: 3, actionType: 'New Device Added', description: 'Added Kitchen Light', timestamp: '2024-06-22T15:00:00' },
-  { id: 4, actionType: 'Rule Triggered', description: 'Turned on Kitchen Light', timestamp: '2024-06-22T16:00:00' },
+  {
+    id: 1,
+    actionType: "Rule Triggered",
+    description: "Turned off Living Room Light",
+    timestamp: "2024-06-22T14:00:00",
+  },
+  {
+    id: 2,
+    actionType: "User Action",
+    description: "Dry run of Bedroom Heater",
+    timestamp: "2024-06-22T14:30:00",
+  },
+  {
+    id: 3,
+    actionType: "New Device Added",
+    description: "Added Kitchen Light",
+    timestamp: "2024-06-22T15:00:00",
+  },
+  {
+    id: 4,
+    actionType: "Rule Triggered",
+    description: "Turned on Kitchen Light",
+    timestamp: "2024-06-22T16:00:00",
+  },
   // Add more mock data as needed
 ];
 
-const expandedMockLogs = Array(10).fill(mockLogs).flatMap((logs, i) =>
-    logs.map((log: { id: number; }) => ({ ...log, id: log.id + i * mockLogs.length }))
+const expandedMockLogs = Array(10)
+  .fill(mockLogs)
+  .flatMap((logs, i) =>
+    logs.map((log: { id: number }) => ({
+      ...log,
+      id: log.id + i * mockLogs.length,
+    }))
   );
 
 const LogsPage: React.FC = () => {
@@ -36,7 +71,7 @@ const LogsPage: React.FC = () => {
       showNotification({
         title: "Invalid Date",
         message: "Start date can't be in the future",
-        color: 'red',
+        color: "red",
         icon: <IconX size={16} />,
       });
       return;
@@ -45,7 +80,7 @@ const LogsPage: React.FC = () => {
       showNotification({
         title: "Invalid Date",
         message: "Start date can't be greater than end date",
-        color: 'red',
+        color: "red",
         icon: <IconX size={16} />,
       });
       return;
@@ -60,7 +95,7 @@ const LogsPage: React.FC = () => {
       showNotification({
         title: "Invalid Date",
         message: "End date can't be in the future",
-        color: 'red',
+        color: "red",
         icon: <IconX size={16} />,
       });
       return;
@@ -69,7 +104,7 @@ const LogsPage: React.FC = () => {
       showNotification({
         title: "Invalid Date",
         message: "End date can't be less than start date",
-        color: 'red',
+        color: "red",
         icon: <IconX size={16} />,
       });
       return;
@@ -91,13 +126,21 @@ const LogsPage: React.FC = () => {
 
   const totalLogs = filteredLogs.length;
   const totalPages = Math.ceil(totalLogs / rowsPerPage);
-  const paginatedLogs = filteredLogs.slice((activePage - 1) * rowsPerPage, activePage * rowsPerPage);
+  const paginatedLogs = filteredLogs.slice(
+    (activePage - 1) * rowsPerPage,
+    activePage * rowsPerPage
+  );
 
   return (
     <Container>
       <Card shadow="sm" padding="lg" radius="md" withBorder>
         <Stack>
-          <Badge color="blue" radius="xl" size="lg" style={{ alignSelf: 'center' }}>
+          <Badge
+            color="blue"
+            radius="xl"
+            size="lg"
+            style={{ alignSelf: "center" }}
+          >
             Logs
           </Badge>
 
@@ -114,7 +157,15 @@ const LogsPage: React.FC = () => {
               value={endDate}
               onChange={handleEndDateChange}
             />
-            <Button onClick={() => { setStartDate(null); setEndDate(null); setActivePage(1); }}>Clear Filters</Button>
+            <Button
+              onClick={() => {
+                setStartDate(null);
+                setEndDate(null);
+                setActivePage(1);
+              }}
+            >
+              Clear Filters
+            </Button>
           </Group>
 
           <Table highlightOnHover striped>
@@ -139,17 +190,20 @@ const LogsPage: React.FC = () => {
           <Group>
             <Select
               label="Rows per page"
-              data={['10', '25', '50']}
+              data={["10", "25", "50"]}
               value={rowsPerPage.toString()}
               onChange={(value) => {
                 setRowsPerPage(Number(value));
                 setActivePage(1); // Reset to first page on rows per page change
               }}
-              style={{ width: '120px' }}
+              style={{ width: "120px" }}
             />
-            <Pagination value={activePage} onChange={setActivePage} total={totalPages} />
+            <Pagination
+              value={activePage}
+              onChange={setActivePage}
+              total={totalPages}
+            />
           </Group>
-          
         </Stack>
       </Card>
     </Container>

@@ -13,8 +13,8 @@ function AboutModal({
   } | null>(null);
 
   useEffect(() => {
-    setInfo({"version": "0.0.1"})
-    }, []);
+    setInfo({ version: "0.0.1" });
+  }, []);
 
   return (
     <Modal
@@ -28,11 +28,7 @@ function AboutModal({
 
       <br />
 
-      <Anchor
-        href="<APP NAME>"
-        target="_blank"
-        rel="noreferrer"
-      >
+      <Anchor href="<APP NAME>" target="_blank" rel="noreferrer">
         WEBSITE LINK
       </Anchor>
     </Modal>

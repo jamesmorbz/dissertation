@@ -11,9 +11,7 @@ import { Notifications } from "@mantine/notifications";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { getDefaultStore, useAtom, useAtomValue } from "jotai";
 import { ContextMenuProvider } from "mantine-contextmenu";
-import {
-  nativeBarAtom,
-} from "./state/atoms";
+import { nativeBarAtom } from "./state/atoms";
 
 import "@mantine/charts/styles.css";
 import "@mantine/core/styles.css";
@@ -55,7 +53,8 @@ export default function App() {
     <>
       <MantineProvider
         colorSchemeManager={colorSchemeManager}
-        defaultColorScheme="dark">
+        defaultColorScheme="dark"
+      >
         <ContextMenuProvider>
           <Notifications />
           <RouterProvider router={router} />

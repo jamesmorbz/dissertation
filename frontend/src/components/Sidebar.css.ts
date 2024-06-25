@@ -10,8 +10,8 @@ export const link = style({
   justifyContent: "center",
   color: "#373A40",
   ":hover": {
-      color: "#EE00FF",
-  }
+    color: "#EE00FF",
+  },
 });
 
 export const active = style({

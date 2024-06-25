@@ -6,4 +6,4 @@ export default function SettingsPage() {
       {/* Add your settings form or UI elements here */}
     </div>
   );
-};
+}

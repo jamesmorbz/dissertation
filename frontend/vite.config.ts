@@ -7,21 +7,21 @@ import { defineConfig } from "vite";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/',
+  base: "/",
   plugins: [react(), vanillaExtractPlugin(), TanStackRouterVite()],
   resolve: {
     alias: [{ find: "@", replacement: resolve(__dirname, "./src") }],
   },
   test: {
     globals: true,
-    environment: 'jsdom',
-    setupFiles: './src/setupTests.ts',
+    environment: "jsdom",
+    setupFiles: "./src/setupTests.ts",
     css: true,
-    reporters: ['verbose'],
+    reporters: ["verbose"],
     coverage: {
-      reporter: ['text', 'json', 'html'],
-      include: ['src/**/*'],
+      reporter: ["text", "json", "html"],
+      include: ["src/**/*"],
       exclude: [],
-    }
+    },
   },
-})
+});

@@ -10,92 +10,92 @@
 
 // Import Routes
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as SettingsImport } from './routes/settings'
-import { Route as SchedulerImport } from './routes/scheduler'
-import { Route as LogsImport } from './routes/logs'
-import { Route as DevicesImport } from './routes/devices'
-import { Route as DataExplorerImport } from './routes/data-explorer'
-import { Route as DashboardImport } from './routes/dashboard'
+import { Route as rootRoute } from "./routes/__root";
+import { Route as SettingsImport } from "./routes/settings";
+import { Route as SchedulerImport } from "./routes/scheduler";
+import { Route as LogsImport } from "./routes/logs";
+import { Route as DevicesImport } from "./routes/devices";
+import { Route as DataExplorerImport } from "./routes/data-explorer";
+import { Route as DashboardImport } from "./routes/dashboard";
 
 // Create/Update Routes
 
 const SettingsRoute = SettingsImport.update({
-  path: '/settings',
+  path: "/settings",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const SchedulerRoute = SchedulerImport.update({
-  path: '/scheduler',
+  path: "/scheduler",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const LogsRoute = LogsImport.update({
-  path: '/logs',
+  path: "/logs",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const DevicesRoute = DevicesImport.update({
-  path: '/devices',
+  path: "/devices",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const DataExplorerRoute = DataExplorerImport.update({
-  path: '/data-explorer',
+  path: "/data-explorer",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const DashboardRoute = DashboardImport.update({
-  path: '/dashboard',
+  path: "/dashboard",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 // Populate the FileRoutesByPath interface
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardImport
-      parentRoute: typeof rootRoute
-    }
-    '/data-explorer': {
-      id: '/data-explorer'
-      path: '/data-explorer'
-      fullPath: '/data-explorer'
-      preLoaderRoute: typeof DataExplorerImport
-      parentRoute: typeof rootRoute
-    }
-    '/devices': {
-      id: '/devices'
-      path: '/devices'
-      fullPath: '/devices'
-      preLoaderRoute: typeof DevicesImport
-      parentRoute: typeof rootRoute
-    }
-    '/logs': {
-      id: '/logs'
-      path: '/logs'
-      fullPath: '/logs'
-      preLoaderRoute: typeof LogsImport
-      parentRoute: typeof rootRoute
-    }
-    '/scheduler': {
-      id: '/scheduler'
-      path: '/scheduler'
-      fullPath: '/scheduler'
-      preLoaderRoute: typeof SchedulerImport
-      parentRoute: typeof rootRoute
-    }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsImport
-      parentRoute: typeof rootRoute
-    }
+    "/dashboard": {
+      id: "/dashboard";
+      path: "/dashboard";
+      fullPath: "/dashboard";
+      preLoaderRoute: typeof DashboardImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/data-explorer": {
+      id: "/data-explorer";
+      path: "/data-explorer";
+      fullPath: "/data-explorer";
+      preLoaderRoute: typeof DataExplorerImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/devices": {
+      id: "/devices";
+      path: "/devices";
+      fullPath: "/devices";
+      preLoaderRoute: typeof DevicesImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/logs": {
+      id: "/logs";
+      path: "/logs";
+      fullPath: "/logs";
+      preLoaderRoute: typeof LogsImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/scheduler": {
+      id: "/scheduler";
+      path: "/scheduler";
+      fullPath: "/scheduler";
+      preLoaderRoute: typeof SchedulerImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/settings": {
+      id: "/settings";
+      path: "/settings";
+      fullPath: "/settings";
+      preLoaderRoute: typeof SettingsImport;
+      parentRoute: typeof rootRoute;
+    };
   }
 }
 
@@ -108,7 +108,7 @@ export const routeTree = rootRoute.addChildren({
   LogsRoute,
   SchedulerRoute,
   SettingsRoute,
-})
+});
 
 /* prettier-ignore-end */
 
