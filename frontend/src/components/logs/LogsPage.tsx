@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Table,
   Card,
@@ -9,10 +9,10 @@ import {
   Button,
   Select,
   Pagination,
-} from "@mantine/core";
-import { DateTimePicker } from "@mantine/dates";
-import { showNotification } from "@mantine/notifications";
-import { IconX } from "@tabler/icons-react";
+} from '@mantine/core';
+import { DateTimePicker } from '@mantine/dates';
+import { showNotification } from '@mantine/notifications';
+import { IconX } from '@tabler/icons-react';
 
 interface LogEntry {
   id: number;
@@ -24,27 +24,27 @@ interface LogEntry {
 const mockLogs: LogEntry[] = [
   {
     id: 1,
-    actionType: "Rule Triggered",
-    description: "Turned off Living Room Light",
-    timestamp: "2024-06-22T14:00:00",
+    actionType: 'Rule Triggered',
+    description: 'Turned off Living Room Light',
+    timestamp: '2024-06-22T14:00:00',
   },
   {
     id: 2,
-    actionType: "User Action",
-    description: "Dry run of Bedroom Heater",
-    timestamp: "2024-06-22T14:30:00",
+    actionType: 'User Action',
+    description: 'Dry run of Bedroom Heater',
+    timestamp: '2024-06-22T14:30:00',
   },
   {
     id: 3,
-    actionType: "New Device Added",
-    description: "Added Kitchen Light",
-    timestamp: "2024-06-22T15:00:00",
+    actionType: 'New Device Added',
+    description: 'Added Kitchen Light',
+    timestamp: '2024-06-22T15:00:00',
   },
   {
     id: 4,
-    actionType: "Rule Triggered",
-    description: "Turned on Kitchen Light",
-    timestamp: "2024-06-22T16:00:00",
+    actionType: 'Rule Triggered',
+    description: 'Turned on Kitchen Light',
+    timestamp: '2024-06-22T16:00:00',
   },
   // Add more mock data as needed
 ];
@@ -69,18 +69,18 @@ const LogsPage: React.FC = () => {
     const now = new Date();
     if (date && date > now) {
       showNotification({
-        title: "Invalid Date",
+        title: 'Invalid Date',
         message: "Start date can't be in the future",
-        color: "red",
+        color: 'red',
         icon: <IconX size={16} />,
       });
       return;
     }
     if (endDate && date && date > endDate) {
       showNotification({
-        title: "Invalid Date",
+        title: 'Invalid Date',
         message: "Start date can't be greater than end date",
-        color: "red",
+        color: 'red',
         icon: <IconX size={16} />,
       });
       return;
@@ -93,18 +93,18 @@ const LogsPage: React.FC = () => {
     const now = new Date();
     if (date && date > now) {
       showNotification({
-        title: "Invalid Date",
+        title: 'Invalid Date',
         message: "End date can't be in the future",
-        color: "red",
+        color: 'red',
         icon: <IconX size={16} />,
       });
       return;
     }
     if (startDate && date && date < startDate) {
       showNotification({
-        title: "Invalid Date",
+        title: 'Invalid Date',
         message: "End date can't be less than start date",
-        color: "red",
+        color: 'red',
         icon: <IconX size={16} />,
       });
       return;
@@ -139,7 +139,7 @@ const LogsPage: React.FC = () => {
             color="blue"
             radius="xl"
             size="lg"
-            style={{ alignSelf: "center" }}
+            style={{ alignSelf: 'center' }}
           >
             Logs
           </Badge>
@@ -190,13 +190,13 @@ const LogsPage: React.FC = () => {
           <Group>
             <Select
               label="Rows per page"
-              data={["10", "25", "50"]}
+              data={['10', '25', '50']}
               value={rowsPerPage.toString()}
               onChange={(value) => {
                 setRowsPerPage(Number(value));
                 setActivePage(1); // Reset to first page on rows per page change
               }}
-              style={{ width: "120px" }}
+              style={{ width: '120px' }}
             />
             <Pagination
               value={activePage}

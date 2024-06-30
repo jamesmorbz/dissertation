@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from 'react';
 import {
   Area,
   XAxis,
@@ -6,7 +6,7 @@ import {
   ResponsiveContainer,
   AreaChart,
   Tooltip,
-} from "recharts";
+} from 'recharts';
 
 function convertDateToUnixTimestamp(date: any) {
   return Math.floor(date.getTime() / 1000);
@@ -27,24 +27,24 @@ function createDate(date: any, days: any, weeks: any, months: any, years: any) {
 
 function Chart() {
   const [data, setData] = useState([
-    { date: "2023-01-01", value: 400 },
-    { date: "2023-01-02", value: 300 },
-    { date: "2023-01-03", value: 200 },
-    { date: "2023-01-04", value: 278 },
-    { date: "2023-01-05", value: 189 },
-    { date: "2023-01-06", value: 239 },
-    { date: "2023-01-07", value: 349 },
-    { date: "2023-01-08", value: 200 },
-    { date: "2023-01-09", value: 300 },
-    { date: "2023-01-10", value: 400 },
+    { date: '2023-01-01', value: 400 },
+    { date: '2023-01-02', value: 300 },
+    { date: '2023-01-03', value: 200 },
+    { date: '2023-01-04', value: 278 },
+    { date: '2023-01-05', value: 189 },
+    { date: '2023-01-06', value: 239 },
+    { date: '2023-01-07', value: 349 },
+    { date: '2023-01-08', value: 200 },
+    { date: '2023-01-09', value: 300 },
+    { date: '2023-01-10', value: 400 },
   ]);
-  const [filter, setFilter] = useState("1W");
+  const [filter, setFilter] = useState('1W');
 
   const chartConfig = {
-    "1D": { resolution: "1", days: 1, weeks: 0, months: 0, years: 0 },
-    "1W": { resolution: "15", days: 0, weeks: 1, months: 0, years: 0 },
-    "1M": { resolution: "60", days: 0, weeks: 0, months: 1, years: 0 },
-    "1Y": { resolution: "D", days: 0, weeks: 0, months: 0, years: 1 },
+    '1D': { resolution: '1', days: 1, weeks: 0, months: 0, years: 0 },
+    '1W': { resolution: '15', days: 0, weeks: 1, months: 0, years: 0 },
+    '1M': { resolution: '60', days: 0, weeks: 0, months: 1, years: 0 },
+    '1Y': { resolution: 'D', days: 0, weeks: 0, months: 0, years: 1 },
   };
 
   return (
@@ -71,8 +71,8 @@ function Chart() {
             </linearGradient>
           </defs>
           <Tooltip
-            contentStyle={{ backgroundColor: "#111827" }}
-            itemStyle={{ color: "#818cf8" }}
+            contentStyle={{ backgroundColor: '#111827' }}
+            itemStyle={{ color: '#818cf8' }}
           />
           <Area
             type="monotone"
@@ -83,7 +83,7 @@ function Chart() {
             strokeWidth={0.5}
           />
           <XAxis dataKey="date" />
-          <YAxis domain={["dataMin", "dataMax"]} />
+          <YAxis domain={['dataMin', 'dataMax']} />
         </AreaChart>
       </ResponsiveContainer>
     </>

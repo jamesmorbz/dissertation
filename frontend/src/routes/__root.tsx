@@ -1,12 +1,12 @@
-import AboutModal from "@/components/About";
-import { SideBar } from "@/components/Sidebar";
-import TopBar from "@/components/TopBar";
-import { AppShell } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import { nativeBarAtom } from "@/state/atoms";
-import { Outlet, createRootRoute, useNavigate } from "@tanstack/react-router";
-import { useAtom, useAtomValue } from "jotai";
-import { useEffect, useState } from "react";
+import AboutModal from '@/components/About';
+import { SideBar } from '@/components/Sidebar';
+import TopBar from '@/components/TopBar';
+import { AppShell } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
+import { nativeBarAtom } from '@/state/atoms';
+import { Outlet, createRootRoute, useNavigate } from '@tanstack/react-router';
+import { useAtom, useAtomValue } from 'jotai';
+import { useEffect, useState } from 'react';
 
 type MenuGroup = {
   label: string;
@@ -32,21 +32,21 @@ function RootLayout() {
 
   const menuActions: MenuGroup[] = [
     {
-      label: "Docs",
+      label: 'Docs',
       options: [
         {
-          label: "Docs",
-          id: "docs",
+          label: 'Docs',
+          id: 'docs',
           action: () => setOpened(true),
         },
       ],
     },
     {
-      label: "Help",
+      label: 'Help',
       options: [
         {
-          label: "About",
-          id: "about",
+          label: 'About',
+          id: 'about',
           action: () => setOpened(true),
         },
       ],
@@ -56,14 +56,14 @@ function RootLayout() {
   return (
     <AppShell
       navbar={{
-        width: "3rem",
+        width: '3rem',
         breakpoint: 0,
       }}
-      header={{ height: "2.5rem" }}
+      header={{ height: '2.5rem' }}
       styles={{
         main: {
-          height: "100vh",
-          userSelect: "none",
+          height: '100vh',
+          userSelect: 'none',
         },
       }}
     >

@@ -7,7 +7,7 @@ import {
   Stack,
   Text,
   Badge,
-} from "@mantine/core";
+} from '@mantine/core';
 import {
   IconRefresh,
   IconX,
@@ -18,9 +18,9 @@ import {
   IconClock,
   IconSignalE,
   IconPower,
-} from "@tabler/icons-react";
-import * as classes from "./styles.css";
-import axios from "axios";
+} from '@tabler/icons-react';
+import * as classes from './styles.css';
+import axios from 'axios';
 
 export interface DeviceProps {
   name: string;
@@ -44,7 +44,7 @@ async function togglePower(hardware_name: string) {
     // In future this could become a POST with a {"COMMAND": "TOGGLE_POWER"} as we could extend
     // the device/XXXXXX/ endpoint to not only power on and off the plug but do other things (like update message interval)
   } catch (error) {
-    console.error("Error Calling Endpoint", error);
+    console.error('Error Calling Endpoint', error);
   }
 }
 
@@ -68,8 +68,8 @@ export function Device({
     >
       <Group style={{ marginBottom: 5 }}>
         <Text size="lg">{name}</Text>
-        <Badge color={status === "ON" ? "green" : "red"}>
-          {status === "ON" ? <IconCheck size={14} /> : <IconX size={14} />}
+        <Badge color={status === 'ON' ? 'green' : 'red'}>
+          {status === 'ON' ? <IconCheck size={14} /> : <IconX size={14} />}
           {status}
         </Badge>
       </Group>
@@ -86,8 +86,8 @@ export function Device({
         <Group>
           <IconClock size={16} />
           <Text>
-            Uptime:{" "}
-            {uptime_seconds !== null ? `${uptime_seconds} seconds` : "N/A"}
+            Uptime:{' '}
+            {uptime_seconds !== null ? `${uptime_seconds} seconds` : 'N/A'}
           </Text>
         </Group>
         <Group>
@@ -104,7 +104,7 @@ export function Device({
         <ActionIcon onClick={() => togglePower(hardware_name)}>
           <IconPower size={20} />
         </ActionIcon>
-        <ActionIcon onClick={() => console.log("force refresh device status")}>
+        <ActionIcon onClick={() => console.log('force refresh device status')}>
           <IconRefresh size={20} />
         </ActionIcon>
       </Group>

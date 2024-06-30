@@ -7,10 +7,10 @@ import {
   Image,
   Menu,
   Text,
-} from "@mantine/core";
-import * as classes from "./TopBar.css";
-import { IconRefresh } from "@tabler/icons-react";
-import { useColorScheme } from "@mantine/hooks";
+} from '@mantine/core';
+import * as classes from './TopBar.css';
+import { IconRefresh } from '@tabler/icons-react';
+import { useColorScheme } from '@mantine/hooks';
 
 type MenuAction = {
   label: string;
@@ -46,13 +46,13 @@ function TopBar({ menuActions }: { menuActions: MenuGroup[] }) {
                   <Menu.Target>
                     <Button
                       style={{
-                        ":active": {
-                          transform: "none",
+                        ':active': {
+                          transform: 'none',
                         },
                       }}
                       fz="sm"
                       variant="subtle"
-                      color={colorScheme === "dark" ? "gray" : "dark"}
+                      color={colorScheme === 'dark' ? 'gray' : 'dark'}
                       size="compact-md"
                     >
                       {action.label}
@@ -60,7 +60,7 @@ function TopBar({ menuActions }: { menuActions: MenuGroup[] }) {
                   </Menu.Target>
                   <Menu.Dropdown>
                     {action.options.map((option, i) =>
-                      option.label === "divider" ? (
+                      option.label === 'divider' ? (
                         <Menu.Divider key={i} />
                       ) : (
                         <Menu.Item
@@ -92,7 +92,7 @@ function TopBar({ menuActions }: { menuActions: MenuGroup[] }) {
               //   onClick={() => appWindow.minimize()}
               className={classes.icon}
             >
-              <ActionIcon onClick={() => console.log("Refresh whole DOM")}>
+              <ActionIcon onClick={() => console.log('Refresh whole DOM')}>
                 <IconRefresh />
               </ActionIcon>
 

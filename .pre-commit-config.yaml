@@ -4,19 +4,7 @@ repos:
     rev: 'v3.1.0'
     hooks:
       - id: prettier
-        name: prettier-ts
-        args: ['--parser', 'typescript']
-        files: ^frontend/.*\.ts$
-      
-      - id: prettier
-        name: prettier-tsx
-        args: ['--parser', 'typescript']
-        files: ^frontend/.*\.tsx$
-
-      - id: prettier
-        name: prettier-html
-        files: '\.(html)$'
-        args: ['--parser', 'html']
+        files: '\.(ts|tsx|js|jsx|json|html|css|scss)$'
 
   - repo: https://github.com/pycqa/autoflake
     rev: v2.3.1

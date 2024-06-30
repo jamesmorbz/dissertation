@@ -1,5 +1,5 @@
-import { Anchor, Modal, Text } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { Anchor, Modal, Text } from '@mantine/core';
+import { useEffect, useState } from 'react';
 
 function AboutModal({
   opened,
@@ -13,7 +13,7 @@ function AboutModal({
   } | null>(null);
 
   useEffect(() => {
-    setInfo({ version: "0.0.1" });
+    setInfo({ version: '0.0.1' });
   }, []);
 
   return (

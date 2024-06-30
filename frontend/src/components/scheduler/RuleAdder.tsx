@@ -1,5 +1,5 @@
 // AddRuleForm.tsx
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Button,
   Card,
@@ -9,25 +9,25 @@ import {
   Select,
   Notification,
   rem,
-} from "@mantine/core";
-import { TimeInput } from "@mantine/dates";
-import { Schedule, AddRuleFormProps } from "./types";
-import { IconX, IconCheck } from "@tabler/icons-react";
-import { showNotification } from "@mantine/notifications";
+} from '@mantine/core';
+import { TimeInput } from '@mantine/dates';
+import { Schedule, AddRuleFormProps } from './types';
+import { IconX, IconCheck } from '@tabler/icons-react';
+import { showNotification } from '@mantine/notifications';
 
 const RuleAdder: React.FC<AddRuleFormProps> = ({ onAddRule }) => {
   const [deviceName, setDeviceName] = useState<string | null>(null);
   const [action, setAction] = useState<string | null>(null);
-  const [time, setTime] = useState<string>("");
+  const [time, setTime] = useState<string>('');
   const [schedule, setSchedule] = useState<Schedule[]>([]);
 
-  const validActions = ["POWER_ON", "POWER OFF"];
-  const currentDevices = ["TASMOTA_XXXXXX", "TASMOTA_YYYYYY"];
+  const validActions = ['POWER_ON', 'POWER OFF'];
+  const currentDevices = ['TASMOTA_XXXXXX', 'TASMOTA_YYYYYY'];
 
   const resetForm = () => {
     setDeviceName(null);
     setAction(null);
-    setTime("");
+    setTime('');
     setSchedule([]);
   };
 
@@ -54,18 +54,18 @@ const RuleAdder: React.FC<AddRuleFormProps> = ({ onAddRule }) => {
         schedule: schedule,
       });
       showNotification({
-        title: "Rule Added",
+        title: 'Rule Added',
         message: `Rule for ${deviceName} successfully Added`,
         icon: <IconCheck size={16} />,
-        color: "green",
+        color: 'green',
       });
       resetForm();
     } else {
       showNotification({
-        title: "Rule Not Added",
+        title: 'Rule Not Added',
         message: `You need to fill out all the fields to add a rule`,
         icon: <IconX size={16} />,
-        color: "red",
+        color: 'red',
       });
     }
   };

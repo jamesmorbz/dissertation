@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Table,
   Card,
@@ -10,16 +10,16 @@ import {
   ActionIcon,
   TextInput,
   Select,
-} from "@mantine/core";
-import { Rule, Schedule } from "./types";
+} from '@mantine/core';
+import { Rule, Schedule } from './types';
 import {
   IconX,
   IconTrash,
   IconEdit,
   IconCheck,
   IconStethoscope,
-} from "@tabler/icons-react";
-import { showNotification } from "@mantine/notifications";
+} from '@tabler/icons-react';
+import { showNotification } from '@mantine/notifications';
 
 interface RuleTableProps {
   rules: Rule[];
@@ -50,12 +50,12 @@ const RuleTable: React.FC<RuleTableProps> = ({
         : [...prevFilters, filter],
     );
     showNotification({
-      title: "Filter updated",
+      title: 'Filter updated',
       message: `${filter} filter has been ${
-        deviceFilters.includes(filter) ? "removed" : "added"
+        deviceFilters.includes(filter) ? 'removed' : 'added'
       }`,
       icon: <IconCheck size={16} />,
-      color: deviceFilters.includes(filter) ? "red" : "green",
+      color: deviceFilters.includes(filter) ? 'red' : 'green',
     });
   };
 
@@ -66,12 +66,12 @@ const RuleTable: React.FC<RuleTableProps> = ({
         : [...prevFilters, filter],
     );
     showNotification({
-      title: "Filter updated",
+      title: 'Filter updated',
       message: `${filter} filter has been ${
-        dayFilters.includes(filter) ? "removed" : "added"
+        dayFilters.includes(filter) ? 'removed' : 'added'
       }`,
       icon: <IconCheck size={16} />,
-      color: dayFilters.includes(filter) ? "red" : "green",
+      color: dayFilters.includes(filter) ? 'red' : 'green',
     });
   };
 
@@ -101,9 +101,9 @@ const RuleTable: React.FC<RuleTableProps> = ({
       !timeFilters.length ||
       timeFilters.some(
         (timeFilter) =>
-          (timeFilter === "Morning" &&
-            parseInt(rule.time.split(":")[0]) < 12) ||
-          (timeFilter === "Evening" && parseInt(rule.time.split(":")[0]) >= 12),
+          (timeFilter === 'Morning' &&
+            parseInt(rule.time.split(':')[0]) < 12) ||
+          (timeFilter === 'Evening' && parseInt(rule.time.split(':')[0]) >= 12),
       );
 
     return deviceMatch && dayMatch && timeMatch;
@@ -216,12 +216,12 @@ const RuleTable: React.FC<RuleTableProps> = ({
             </Menu.Target>
             <Menu.Dropdown>
               <Menu.Item
-                onClick={() => toggleFilter("Morning", setTimeFilters)}
+                onClick={() => toggleFilter('Morning', setTimeFilters)}
               >
                 Morning
               </Menu.Item>
               <Menu.Item
-                onClick={() => toggleFilter("Evening", setTimeFilters)}
+                onClick={() => toggleFilter('Evening', setTimeFilters)}
               >
                 Evening
               </Menu.Item>
@@ -261,7 +261,7 @@ const RuleTable: React.FC<RuleTableProps> = ({
                   {editingRuleId === rule.id ? (
                     <Select
                       value={editedRule.action || rule.action}
-                      data={["Turn On", "Turn Off"]}
+                      data={['Turn On', 'Turn Off']}
                       onChange={(value) =>
                         setEditedRule({ ...editedRule, action: value! })
                       }
@@ -302,7 +302,7 @@ const RuleTable: React.FC<RuleTableProps> = ({
                       }
                     />
                   ) : (
-                    rule.schedule.join(", ")
+                    rule.schedule.join(', ')
                   )}
                 </td>
                 <td>

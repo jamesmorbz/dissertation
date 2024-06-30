@@ -1,7 +1,7 @@
-import { Card, SimpleGrid, Stack, Title } from "@mantine/core";
-import { Device, DeviceProps } from "./Device";
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { Card, SimpleGrid, Stack, Title } from '@mantine/core';
+import { Device, DeviceProps } from './Device';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 function DevicesPage() {
   const [devices, setDevices] = useState<DeviceProps[]>([]);
@@ -10,11 +10,11 @@ function DevicesPage() {
     const fetchData = async () => {
       try {
         const response = await axios.get<DeviceProps[]>(
-          "http://127.0.0.1:8000/devices/current_state",
+          'http://127.0.0.1:8000/devices/current_state',
         );
         setDevices(response.data);
       } catch (error) {
-        console.error("Error fetching data", error);
+        console.error('Error fetching data', error);
       }
     };
     fetchData();
@@ -29,7 +29,7 @@ function DevicesPage() {
       spacing="md"
       p="md"
       h="100%" // TODO: 50% w/ cols 4
-      style={{ overflow: "hidden" }}
+      style={{ overflow: 'hidden' }}
     >
       {devices.map((device, index) => (
         <Card key={index}>

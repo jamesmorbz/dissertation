@@ -1,4 +1,4 @@
-import { AppShellSection, Stack, Tooltip } from "@mantine/core";
+import { AppShellSection, Stack, Tooltip } from '@mantine/core';
 import {
   type Icon,
   IconChartHistogram,
@@ -7,10 +7,10 @@ import {
   IconCalendarClock,
   IconSettings,
   IconLogs,
-} from "@tabler/icons-react";
-import { Link, useMatchRoute } from "@tanstack/react-router";
-import cx from "clsx";
-import * as styles from "./Sidebar.css";
+} from '@tabler/icons-react';
+import { Link, useMatchRoute } from '@tanstack/react-router';
+import cx from 'clsx';
+import * as styles from './Sidebar.css';
 
 interface NavbarLinkProps {
   icon: Icon;
@@ -36,11 +36,11 @@ function NavbarLink({ url, icon: Icon, label }: NavbarLinkProps) {
 }
 
 const linksdata = [
-  { icon: IconChartHistogram, label: "Dashboard", url: "/dashboard" },
-  { icon: IconDatabase, label: "Data Explorer", url: "/data-explorer" },
-  { icon: IconDevices, label: "Devices", url: "/devices" },
-  { icon: IconCalendarClock, label: "Scheduler", url: "/scheduler" },
-  { icon: IconLogs, label: "Logs", url: "/logs" },
+  { icon: IconChartHistogram, label: 'Dashboard', url: '/dashboard' },
+  { icon: IconDatabase, label: 'Data Explorer', url: '/data-explorer' },
+  { icon: IconDevices, label: 'Devices', url: '/devices' },
+  { icon: IconCalendarClock, label: 'Scheduler', url: '/scheduler' },
+  { icon: IconLogs, label: 'Logs', url: '/logs' },
 ];
 
 export function SideBar() {

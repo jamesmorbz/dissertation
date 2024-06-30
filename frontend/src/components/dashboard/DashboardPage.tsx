@@ -1,5 +1,5 @@
-import { Card, SimpleGrid, Stack, Title } from "@mantine/core";
-import Chart from "./Chart";
+import { Card, SimpleGrid, Stack, Title } from '@mantine/core';
+import Chart from './Chart';
 function DashboardPage() {
   return (
     // <SimpleGrid
