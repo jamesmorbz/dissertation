@@ -62,7 +62,7 @@ pre-commit run --all-files
 
 [Pre Commit Hooks](https://pre-commit.com/#usage) will now be installed locally and will run before each commit. If there are errors with formatting you need to run your commit command twice before pushing.
 
-First commit flags the error, second commit will actually fix it and commit the formatted version
+You can now only commit if the tests succeed. This means that the first commit flags the error and fixes it whereas the second commit actually works and can be pushed to source control.
 
 See more here: [Git Hooks (Git Documentation)](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks)
 
