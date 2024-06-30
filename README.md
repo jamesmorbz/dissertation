@@ -1,57 +1,75 @@
-Intro About Project (and the fact it's for a dissertation)
+# Intro
 
-Requirements:
+The fact it's for a dissertation
 
-Python 3.12
+# Requirements:
 
-Node 20.14.0
+* Python 3.12.4
+* Node 20.14.0
 
-Frontend:
+# **Frontend**
 
+```bash
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-
 nvm install 20.14.0
-
 npm upgrade -g npm
-
 cd frontend
-
 npm install
+npm start
+```
 
-npm start => localhost:5173
-
-Advantages of Vite:
+## Advantages of Vite
 
 Quick, easy to use
 
-Vite shortcuts:
+## Vite shortcuts
 
-Shortcuts
+Shortcuts:
   press r + enter to restart the server
   press u + enter to show server url
   press o + enter to open in browser
   press c + enter to clear console
   press q + enter to quit
 
-If you have vulnerabilities:
+## Quality of Project
 
-npm audit fix (it will alert if it is adding breaking changes)
+We want to avoid having vulnerabilities in the project. In order to fix this:
 
-Backend:
+```
+npm audit fix
+```
 
+(it will alert if it is adding breaking changes)
+
+# Backend
+
+```bash
 brew install python@3.12
-
 python -m venv venv
-
 pip install --upgrade pip
-
 pip install -r requirements.txt
+cd backend
+python main.py
+```
 
-python backend/main.py
 
+# Developer Experience (CI)
 
-CI
-
+```
 pre-commit install
+pre-commit run --all-files
+```
 
-now commit as usual and the checks will be run in the background
+[Pre Commit Hooks](https://pre-commit.com/#usage) will now be installed locally and will run before each commit. If there are errors with formatting you need to run your commit command twice before pushing.
+
+First commit flags the error, second commit will actually fix it and commit the formatted version
+
+See more here: [Git Hooks (Git Documentation)](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks)
+
+# Automated Scripts
+
+```bash
+chmod +x create_database.sh start.sh
+./create_database.sh
+./start.sh
+```
