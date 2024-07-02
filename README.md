@@ -6,6 +6,7 @@ The fact it's for a dissertation
 
 * Python 3.12.4
 * Node 20.14.0
+* InfluxDB 2.7.6
 
 # **Frontend**
 
@@ -25,11 +26,12 @@ Quick, easy to use
 ## Vite shortcuts
 
 Shortcuts:
-  press r + enter to restart the server
-  press u + enter to show server url
-  press o + enter to open in browser
-  press c + enter to clear console
-  press q + enter to quit
+
+* press r + enter to restart the server
+* press u + enter to show server url
+* press o + enter to open in browser
+* press c + enter to clear console
+* press q + enter to quit
 
 ## Quality of Project
 
@@ -52,6 +54,34 @@ cd backend
 python main.py
 ```
 
+# Storage
+
+## InfluxDB
+
+For storing timeseries data we've chosen InfluxDB to get this running locally:
+
+```bash
+brew install influxdb
+brew install influxdb-cli
+```
+
+Then you simply need to run:
+
+```bash
+influxd
+```
+
+which will start a local instance of the database on localhost:8086
+
+There is an interactive UI that you can visit at that address or you can use influxdb-cli to interact with the DB
+
+## SQL
+
+While we use InfluxDB for storing timeseries data there are datasets that are not good fits for this style of temporal data.
+
+We will still have a relational database which we use for metadata and various other uses.
+
+For now this is SQLite which can be setup using the Automated Scripts below however we may move this to PostrgresSQL in the future.
 
 # Developer Experience (CI)
 
