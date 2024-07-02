@@ -1,7 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic.dataclasses import dataclass
 from datetime import datetime
-import sqlite3
+from core.dependencies import sqlite_client_dependency
+from core.queries import read_query
 from dataclasses import field
 from typing import List
 from fastapi.encoders import jsonable_encoder
@@ -69,33 +70,11 @@ async def update_device_details(device_id, device_details: DeviceDetails):
     summary="Get the current status of all devices",
 )
 # @cache(expire=5) # TODO a bit aggresive??
-async def devices_current_state():
-    query = """
-        WITH last_state AS (
-            SELECT *,
-                   ROW_NUMBER() OVER (PARTITION BY topic ORDER BY time DESC) as rn
-            FROM state_messages
-        )
-        SELECT
-            COALESCE(mapping.friendly_name, state.topic) as hardware_name,
-            state.topic,
-            'device_type' as device_type,  -- Replace with actual device type if available
-            state.POWER as status,
-            state.time as last_updated,
-            state.uptime_sec as uptime_seconds,
-            state.wifi_ssid,
-            state.wifi_rssi
-        FROM last_state state
-        LEFT JOIN device_mappings mapping
-        ON state.topic = mapping.tasmota_name
-        WHERE state.rn = 1
-    """
-
-    conn = sqlite3.connect("mqtt_messages.db")
-    cursor = conn.cursor()
+async def devices_current_state(sql_client=Depends(sqlite_client_dependency)):
+    query = read_query("device_last_status.sql")
+    cursor = sql_client.cursor()
     cursor.execute(query)
     rows = cursor.fetchall()
-    conn.close()
 
     device_list = [
         {

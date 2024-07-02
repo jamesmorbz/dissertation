@@ -1,16 +1,21 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime, timedelta
 import random
 from pydantic.dataclasses import dataclass
 from typing import List
+from core.dependencies import get_influxdb_client
+from influxdb_client import InfluxDBClient
+import json
+from influxdb_client.client.flux_table import TableList
 
 router = APIRouter()
 
 
 @dataclass
 class DataPoint:
-    timestamp: int
-    power: int
+    _unix: int
+    _value: int | None  # TODO maybe null values should be 0?
+    _time: str
 
 
 @dataclass
@@ -38,6 +43,13 @@ def generate_data(start_timestamp, lookback_minutes, interval_seconds):
     return data
 
 
+# TODO ensure these are the supported units of time supported  duration_lit        = int_lit duration_unit .
+# duration_unit       = "s" | "m" | "h" | "d" | "w" .
+# TODO can play around with time truncation if we ever need
+# |> truncateTimeColumn(unit: {interval})
+# TODO use start_timestamp
+
+
 @router.get(
     "/{device_id}",
     response_model=Dataset,
@@ -45,15 +57,26 @@ def generate_data(start_timestamp, lookback_minutes, interval_seconds):
     summary="Get Power Usage Data for a Device",
 )
 async def get_data(
-    device_id: str,
+    device_id: str,  # TODO remove this default value
     start_timestamp: int = int(datetime.now().timestamp()),
-    lookback_minutes: int = 240,
-    interval_seconds: int = 60,
+    lookback: str = "15m",
+    interval: str = "1m",
+    aggregation: str = "max",
+    influx_client: InfluxDBClient = Depends(get_influxdb_client),
 ):
-    # start_timestamp = datetime(2024, 6, 11, 22, 3, 14).timestamp()
-    data = generate_data(
-        start_timestamp, lookback_minutes, interval_seconds
-    )  # 100 points, 1 minute apart
+    query_api = influx_client.query_api()
+    # TODO how can I store influx queries in a more elegant way?
+    query = f"""
+    from(bucket: "metrics")
+        |> range(start: -{lookback})
+        |> filter(fn: (r) => r["_measurement"] == "wattage")
+        |> filter(fn: (r) => r["_field"] == "power")
+        |> filter(fn: (r) => r["hardware_name"] == "{device_id}")
+        |> aggregateWindow(every: {interval}, fn: {aggregation}, createEmpty: true)
+        |> map(fn: (r) => ({{ r with _unix: uint(v: r._time) }}))
+    """
+    response: TableList = query_api.query(query)
+    data = json.loads(response.to_json(["_unix", "_value", "_time"]))
 
     return {"device_name": device_id, "data": data}
 
