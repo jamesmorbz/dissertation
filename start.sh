@@ -38,7 +38,7 @@ fi
 uvicorn main:app &
 
 ## Run the database writer
-python write_mqtt_to_sql.py &
+python write_mqtt_to_influx.py &
 
 # Wait for background processes to complete
 wait
