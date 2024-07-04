@@ -55,12 +55,14 @@ def create_database():
     """
     )
 
+    c.execute("DROP TABLE IF EXISTS device_mappings")
     c.execute(
         """
         CREATE TABLE IF NOT EXISTS device_mappings (
-            id INTEGER PRIMARY KEY,
-            tasmota_name TEXT UNIQUE,
-            friendly_name TEXT
+            hardware_name TEXT PRIMARY KEY,
+            friendly_name TEXT,
+            tag TEXT,
+            last_updated TIMESTAMP
         )
     """
     )
