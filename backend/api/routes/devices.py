@@ -12,13 +12,12 @@ from sqlite3 import Connection, Error
 router = APIRouter()
 
 
+# TODO TAG is overwritten on response of /devices GET endpoint
 @dataclass
 class DeviceDetails:
     hardware_name: str
     friendly_name: str
-    tag: str | None = (
-        ""  # TODO this overwrites the value of tag on response of /devices GET endpoint
-    )
+    tag: str | None = ""
     last_updated: int = int(datetime.now().timestamp())
 
 
@@ -26,6 +25,7 @@ class DeviceDetails:
 class DeviceStatus:
     timestamp: str
     hardware_name: str
+    friendly_name: str
     wifi_name: str
     power: bool
     uptime: int
@@ -43,16 +43,7 @@ async def devices(sql_client: Connection = Depends(sqlite_client_dependency)):
     cur = sql_client.cursor()
     cur.execute("SELECT * FROM device_mappings GROUP BY hardware_name")
     raw_data = cur.fetchall()
-    data = []
-    for row in raw_data:
-        data.append(
-            {
-                "hardware_name": row[0],
-                "friendly_name": row[1],
-                "tags": row[2],
-                "last_updated": row[3],
-            }
-        )
+    data = [DeviceDetails(*row) for row in raw_data]
 
     return data
 
@@ -119,6 +110,7 @@ async def update_device_details(
 # @cache(expire=5) # TODO a bit aggresive??
 async def devices_current_state(
     influx_client: InfluxDBClient = Depends(influxdb_client_dependency),
+    sql_client: Connection = Depends(sqlite_client_dependency),
 ):
     query_api = influx_client.query_api()
     # TODO how can I store influx queries in a more elegant way?
@@ -138,9 +130,15 @@ async def devices_current_state(
     for row in rows:
         device_name = row["hardware_name"]
         if device_name not in devices:
+            cur = sql_client.cursor()
+            cur.execute(
+                f"SELECT friendly_name FROM device_mappings WHERE hardware_name = '{device_name}'"
+            )
+            friendly_name = cur.fetchone()[0]
             devices[device_name] = {
                 "timestamp": row["_time"],
                 "hardware_name": row["hardware_name"],
+                "friendly_name": friendly_name,
                 "wifi_name": row["wifi_name"],
                 row["_field"]: row["_value"],
             }

@@ -1,8 +1,10 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, Depends
 from pydantic.dataclasses import dataclass
 import sys
 import fastapi
 from typing import Optional
+from core.dependencies import influxdb_client_dependency
+from influxdb_client import InfluxDBClient
 
 router = APIRouter()
 
@@ -11,6 +13,13 @@ router = APIRouter()
 class DatabaseStatus:
     status: str
     database_version: str
+
+
+@dataclass
+class InfluxState:
+    version: str
+    status: str
+    message: str
 
 
 @dataclass
@@ -38,7 +47,6 @@ class BackendStatus:
     message: str
     fastapi_version: str
     python_version: str
-    database_version: str
 
 
 @dataclass
@@ -56,7 +64,6 @@ async def read_root():
         "message": "For interactive documentation, please visit /docs",
         "fastapi_version": fastapi.__version__,
         "python_version": sys.version,
-        "database_version": "TBC",
     }
 
 
@@ -90,7 +97,7 @@ def get_db_health() -> DatabaseStatus:
     summary="Give the full metrics of the DB",
     response_model=DatabaseMetrics,
 )
-def get_db_storage():
+def get_db_metrics(influxdb_client=Depends(influxdb_client_dependency)):
     return DatabaseMetrics(
         rows=1000000,
         size=104857600,
@@ -108,4 +115,19 @@ def get_db_storage():
         disk_io=1048576000,
         index_usage="High usage on main index",
         replication_lag=0.5,
+    )
+
+
+@router.get(
+    "/influx_health",
+    tags=["Monitoring"],
+    summary="Give the current status of the InfluxDB Instance",
+    response_model=InfluxState,
+)
+def get_db_metrics(
+    influxdb_client: InfluxDBClient = Depends(influxdb_client_dependency),
+):
+    influx_status = influxdb_client.health()
+    return InfluxState(
+        influx_status.version, influx_status.status, influx_status.message
     )
