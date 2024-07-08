@@ -5,6 +5,7 @@ repos:
     hooks:
       - id: prettier
         files: '\.(ts|tsx|js|jsx|json|html|css|scss)$'
+        exclude: '\.gen.ts$'
 
   - repo: https://github.com/pycqa/autoflake
     rev: v2.3.1
