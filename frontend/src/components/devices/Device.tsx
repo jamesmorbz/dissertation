@@ -23,14 +23,15 @@ import * as classes from './styles.css';
 import axios from 'axios';
 
 export interface DeviceProps {
-  name: string;
+  friendly_name: string;
   hardware_name: string;
   device_type: string;
-  status: string;
-  last_updated: string;
-  uptime_seconds: number | null;
-  wifi_ssid: string;
-  wifi_rssi: string;
+  power: boolean;
+  timestamp: string;
+  uptime: number | null;
+  wifi_name: string;
+  wifi_rssi: number;
+  wifi_signal: number;
 }
 
 async function togglePower(hardware_name: string) {
@@ -49,13 +50,13 @@ async function togglePower(hardware_name: string) {
 }
 
 export function Device({
-  name,
+  friendly_name,
   hardware_name,
   device_type,
-  status,
-  last_updated,
-  uptime_seconds,
-  wifi_ssid,
+  power,
+  timestamp,
+  uptime,
+  wifi_name,
   wifi_rssi,
 }: DeviceProps) {
   return (
@@ -67,10 +68,10 @@ export function Device({
       className={classes.card}
     >
       <Group style={{ marginBottom: 5 }}>
-        <Text size="lg">{name}</Text>
-        <Badge color={status === 'ON' ? 'green' : 'red'}>
-          {status === 'ON' ? <IconCheck size={14} /> : <IconX size={14} />}
-          {status}
+        <Text size="lg">{friendly_name}</Text>
+        <Badge color={power ? 'green' : 'red'}>
+          {power ? <IconCheck size={14} /> : <IconX size={14} />}
+          {power ? 'ON' : 'OFF'}
         </Badge>
       </Group>
 
@@ -79,20 +80,17 @@ export function Device({
           <IconDeviceMobile size={16} />
           <Text>{hardware_name}</Text>
         </Group>
-        <Group>
+        {/* TODO - Add this enrichment <Group>
           <IconPlug size={16} />
-          <Text>??</Text> {/*{device_type} */}
-        </Group>
+          <Text>??</Text>
+        </Group> */}
         <Group>
           <IconClock size={16} />
-          <Text>
-            Uptime:{' '}
-            {uptime_seconds !== null ? `${uptime_seconds} seconds` : 'N/A'}
-          </Text>
+          <Text>Uptime: {uptime !== null ? `${uptime} seconds` : 'N/A'}</Text>
         </Group>
         <Group>
           <IconWifi size={16} />
-          <Text>SSID: {wifi_ssid}</Text>
+          <Text>SSID: {wifi_name}</Text>
         </Group>
         <Group>
           <IconSignalE size={16} />
@@ -104,14 +102,14 @@ export function Device({
         <ActionIcon onClick={() => togglePower(hardware_name)}>
           <IconPower size={20} />
         </ActionIcon>
-        <ActionIcon onClick={() => console.log('force refresh device status')}>
+        <ActionIcon onClick={() => console.log('force refresh device power')}>
           <IconRefresh size={20} />
         </ActionIcon>
       </Group>
 
       <Text className={classes.lastUpdated}>
         <IconClock size={20} />
-        Last Updated: {new Date(last_updated).toLocaleString()}
+        Last Updated: {new Date(timestamp).toLocaleString()}
       </Text>
     </Card>
   );

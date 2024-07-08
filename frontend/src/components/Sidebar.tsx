@@ -20,16 +20,16 @@ interface NavbarLinkProps {
 }
 
 function NavbarLink({ url, icon: Icon, label }: NavbarLinkProps) {
-  const matcesRoute = useMatchRoute();
+  const matchesRoute = useMatchRoute();
   return (
     <Tooltip label={label} position="right">
       <Link
         to={url}
         className={cx(styles.link, {
-          [styles.active]: matcesRoute({ to: url, fuzzy: true }),
+          [styles.active]: matchesRoute({ to: url, fuzzy: true }),
         })}
       >
-        <Icon size="2.5rem" stroke={1} />
+        <Icon stroke={1} />
       </Link>
     </Tooltip>
   );

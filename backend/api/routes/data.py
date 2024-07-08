@@ -33,16 +33,6 @@ class Summary:
     average_power: float
 
 
-def generate_data(start_timestamp, lookback_minutes, interval_seconds):
-    data = []
-
-    for i in range(lookback_minutes):
-        date = start_timestamp - (i * interval_seconds)
-        data.append(DataPoint(date, random.randint(100, 300)))
-
-    return data
-
-
 # TODO ensure these are the supported units of time supported  duration_lit        = int_lit duration_unit .
 # duration_unit       = "s" | "m" | "h" | "d" | "w" .
 # TODO can play around with time truncation if we ever need
@@ -76,8 +66,8 @@ async def get_data(
         |> map(fn: (r) => ({{ r with _unix: uint(v: r._time) }}))
     """
     response: TableList = query_api.query(query)
-    data = json.loads(response.to_json(["_unix", "_value", "_time"]))
-
+    data = json.loads(response.to_json(["_unix", "_value", "_time"]))[1:-1]
+    # TODO - currently removing -1 as the timestamp takes a different format and is skewed off the minute - this may have side effects
     return {"device_name": device_id, "data": data}
 
 

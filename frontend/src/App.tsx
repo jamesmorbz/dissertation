@@ -13,7 +13,6 @@ import { getDefaultStore, useAtom, useAtomValue } from 'jotai';
 import { ContextMenuProvider } from 'mantine-contextmenu';
 import { nativeBarAtom } from './state/atoms';
 
-import '@mantine/charts/styles.css';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
