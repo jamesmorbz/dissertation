@@ -47,7 +47,7 @@ class SummarySet:
 
 
 @router.get(
-    "/{device_id}",
+    "/device/{device_id}",
     response_model=Dataset,
     tags=["Device"],
     summary="Get Power Usage Data for a Device",
@@ -77,40 +77,8 @@ async def get_device_data(
     return {"device_name": device_id, "data": data}
 
 
-@router.get(  # TODO - I don't know what's happening with the routes
-    "/daily_data",
-    response_model=Summary,
-    tags=["TBC"],
-    summary="TBC1",
-)
-async def get_daily_data(
-    lookback_days: int = 7,
-    influx_client: InfluxDBClient = Depends(get_influxdb_client),
-):
-    query_api = influx_client.query_api()
-    query = f"""
-        from(bucket: "metrics")
-        |> range(start: -{lookback_days}d)
-        |> filter(fn: (r) => r["_measurement"] == "wattage")
-        |> filter(fn: (r) => r["_field"] == "power")
-        |> aggregateWindow(every: 1d, fn: sum, createEmpty: false)
-    """
-    response: TableList = query_api.query(query)
-    rows = json.loads(response.to_json("hardware_name", "_unix", "_value", "_time"))
-    data = {}
-    for row in rows:
-        device_name = row["hardware_name"]
-        data_point = DataPoint(row["_unix"], row["_value"], row["_time"])
-        if device_name not in data:
-            data[device_name] = {"device_name": device_name, "data": data_point}
-        else:
-            data[device_name]["data"].append(data_point)
-
-    return data.values()
-
-
 @router.get(
-    "/{device_id}/daily_data_TBC",
+    "/device/{device_id}/daily_data",
     response_model=Dataset,
     tags=["Device"],
     summary="TBC",
@@ -133,3 +101,36 @@ async def get_device_daily_data(
     response: TableList = query_api.query(query)
     data = json.loads(response.to_json(["_unix", "_value", "_time"]))
     return {"device_name": device_id, "data": data}
+
+
+@router.get(  # TODO - I don't know what's happening with the routes
+    "/daily_data",
+    response_model=List[Dataset],
+    tags=["Summary", "Device"],
+    summary="TBC1",
+)
+async def get_daily_data(
+    lookback_days: int = 7,
+    influx_client: InfluxDBClient = Depends(get_influxdb_client),
+):
+    query_api = influx_client.query_api()
+    query = f"""
+        from(bucket: "metrics")
+        |> range(start: -{lookback_days}d)
+        |> filter(fn: (r) => r["_measurement"] == "wattage")
+        |> filter(fn: (r) => r["_field"] == "power")
+        |> aggregateWindow(every: 1d, fn: sum, createEmpty: true)
+        |> map(fn: (r) => ({{ r with _unix: uint(v: r._time) }}))
+    """
+    response: TableList = query_api.query(query)
+    rows = json.loads(response.to_json(["hardware_name", "_unix", "_value", "_time"]))
+    data = {}
+    for row in rows:
+        device_name = row["hardware_name"]
+        data_point = DataPoint(row["_unix"], row["_value"], row["_time"])
+        if device_name not in data:
+            data[device_name] = {"device_name": device_name, "data": [data_point]}
+        else:
+            data[device_name]["data"].append(data_point)
+
+    return data.values()
