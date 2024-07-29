@@ -1,5 +1,3 @@
-# config.py
-
 from pydantic_settings import BaseSettings
 import yaml
 
@@ -12,7 +10,7 @@ class Settings(BaseSettings):
 
 
 def load_config() -> Settings:
-    with open("config.yaml", "r") as file:
+    with open("config/influx_config.yaml", "r") as file:
         config_data = yaml.safe_load(file)
     return Settings(**config_data)
 
