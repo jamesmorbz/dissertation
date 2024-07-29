@@ -1,6 +1,5 @@
-from fastapi import APIRouter, HTTPException, Depends
-from datetime import datetime, timedelta
-import random
+from fastapi import APIRouter, Depends
+from datetime import datetime
 from pydantic.dataclasses import dataclass
 from typing import List
 from core.dependencies import get_influxdb_client
@@ -33,6 +32,13 @@ class Summary:
     average_power: float
 
 
+# TODO - If we remove device name from the above summary data class we should add the below data class
+@dataclass
+class SummarySet:
+    device_name: str
+    data: List[Summary]
+
+
 # TODO ensure these are the supported units of time supported  duration_lit        = int_lit duration_unit .
 # duration_unit       = "s" | "m" | "h" | "d" | "w" .
 # TODO can play around with time truncation if we ever need
@@ -46,7 +52,7 @@ class Summary:
     tags=["Device"],
     summary="Get Power Usage Data for a Device",
 )
-async def get_data(
+async def get_device_data(
     device_id: str,  # TODO remove this default value
     start_timestamp: int = int(datetime.now().timestamp()),
     lookback: str = "15m",
@@ -71,42 +77,59 @@ async def get_data(
     return {"device_name": device_id, "data": data}
 
 
-@router.get(
-    "/{device_id}/summary",
+@router.get(  # TODO - I don't know what's happening with the routes
+    "/daily_data",
     response_model=Summary,
-    tags=["Device"],
-    summary="Get Power Usage Summary for a Device",
+    tags=["TBC"],
+    summary="TBC1",
 )
-async def get_summary(
-    device_id: str,
-    end_date: str = datetime.now().strftime("%d-%m-%Y"),
-    start_date: str = (datetime.now() - timedelta(days=1)).strftime("%d-%m-%Y"),
+async def get_daily_data(
+    lookback_days: int = 7,
+    influx_client: InfluxDBClient = Depends(get_influxdb_client),
 ):
-    try:
-        start_dt = datetime.strptime(start_date, "%d-%m-%Y")
-        end_dt = datetime.strptime(end_date, "%d-%m-%Y")
-    except ValueError:
-        raise HTTPException(
-            status_code=400, detail="Incorrect date format, should be DD-MM-YYYY"
-        )
+    query_api = influx_client.query_api()
+    query = f"""
+        from(bucket: "metrics")
+        |> range(start: -{lookback_days}d)
+        |> filter(fn: (r) => r["_measurement"] == "wattage")
+        |> filter(fn: (r) => r["_field"] == "power")
+        |> aggregateWindow(every: 1d, fn: sum, createEmpty: false)
+    """
+    response: TableList = query_api.query(query)
+    rows = json.loads(response.to_json("hardware_name", "_unix", "_value", "_time"))
+    data = {}
+    for row in rows:
+        device_name = row["hardware_name"]
+        data_point = DataPoint(row["_unix"], row["_value"], row["_time"])
+        if device_name not in data:
+            data[device_name] = {"device_name": device_name, "data": data_point}
+        else:
+            data[device_name]["data"].append(data_point)
 
-    if start_dt >= end_dt:
-        raise HTTPException(
-            status_code=400, detail="start_date must be before end_date"
-        )
+    return data.values()
 
-    total_minutes = int((end_dt - start_dt).total_seconds() / 60)
-    total_power = sum(
-        random.randint(100, 300) for _ in range(total_minutes)
-    )  # Simulated total
-    average_power = total_power / total_minutes
 
-    summary = {
-        "device_name": device_id,
-        "end_timestamp": int(start_dt.timestamp()),
-        "start_timestamp": int(end_dt.timestamp()),
-        "total_power": total_power,
-        "average_power": average_power,
-    }
-
-    return summary
+@router.get(
+    "/{device_id}/daily_data_TBC",
+    response_model=Dataset,
+    tags=["Device"],
+    summary="TBC",
+)
+async def get_device_daily_data(
+    device_id: str,
+    lookback_days: int = 7,
+    influx_client: InfluxDBClient = Depends(get_influxdb_client),
+):
+    query_api = influx_client.query_api()
+    query = f"""
+        from(bucket: "metrics")
+        |> range(start: -{lookback_days}d)
+        |> filter(fn: (r) => r["_measurement"] == "wattage")
+        |> filter(fn: (r) => r["_field"] == "power")
+        |> filter(fn: (r) => r["hardware_name"] == "{device_id}")
+        |> aggregateWindow(every: 1d, fn: sum, createEmpty: true)
+        |> map(fn: (r) => ({{ r with _unix: uint(v: r._time) }}))
+    """
+    response: TableList = query_api.query(query)
+    data = json.loads(response.to_json(["_unix", "_value", "_time"]))
+    return {"device_name": device_id, "data": data}

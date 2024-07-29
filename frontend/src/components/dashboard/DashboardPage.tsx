@@ -2,7 +2,7 @@ import { Chart, DataProps } from './Chart';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Card, SimpleGrid, Stack, Title, Select } from '@mantine/core';
-
+import { DeviceOnlineCard } from './DeviceOnlineCard';
 interface Device {
   hardware_name: string;
   friendly_name: string;
@@ -66,7 +66,18 @@ function DashboardPage() {
       <h3>{selectedDevice}</h3>
       {data ? <Chart {...data} /> : <p>Loading data...</p>}
       <div>Last Updated: {lastPoll}</div>
-      <div>Number of Devices: {devices.length}</div>
+      <SimpleGrid
+        cols={4}
+        spacing="md"
+        p="md"
+        h="100%" // TODO: 50% w/ cols 4
+        style={{ overflow: 'hidden' }}
+      >
+        <DeviceOnlineCard devices_online={devices.length}></DeviceOnlineCard>
+        <DeviceOnlineCard devices_online={devices.length}></DeviceOnlineCard>
+        <DeviceOnlineCard devices_online={devices.length}></DeviceOnlineCard>
+        <DeviceOnlineCard devices_online={devices.length}></DeviceOnlineCard>
+      </SimpleGrid>
     </div>
   );
 }

@@ -17,7 +17,7 @@ class DatabaseStatus:
 
 @dataclass
 class InfluxState:
-    version: str
+    version: str | None
     status: str
     message: str
 
