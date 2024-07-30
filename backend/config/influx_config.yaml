@@ -1,4 +1,5 @@
-influxdb_url: http://localhost:8086
-influxdb_token: _VvTdkvnwyYzmHdyq-LE9R1lvrdM_aNO3q06es7EswjFgMK6UHByit1HWyiAZO3m4JLC0bHN6rJsU_ossUTJSA== # TODO Example Token that will get rotated and stored in a better place
-influxdb_org: diss
-influxdb_bucket: metrics
+url: http://localhost:8086
+token: _VvTdkvnwyYzmHdyq-LE9R1lvrdM_aNO3q06es7EswjFgMK6UHByit1HWyiAZO3m4JLC0bHN6rJsU_ossUTJSA== # TODO Example Token that will get rotated and stored in a better place
+org: diss
+bucket: metrics
+debug: false

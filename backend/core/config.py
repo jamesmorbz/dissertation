@@ -2,17 +2,40 @@ from pydantic_settings import BaseSettings
 import yaml
 
 
-class Settings(BaseSettings):
-    influxdb_url: str
-    influxdb_token: str
-    influxdb_org: str
-    influxdb_bucket: str
+class InfluxSettings(BaseSettings):
+    url: str
+    token: str
+    org: str
+    bucket: str
+    debug: bool
 
 
-def load_config() -> Settings:
+class FastAPISettings(BaseSettings):
+    host: str
+    port: int
+    log_level: str
+    reload: bool
+    debug: bool
+
+
+def load_influx_config() -> InfluxSettings:
     with open("config/influx_config.yaml", "r") as file:
         config_data = yaml.safe_load(file)
-    return Settings(**config_data)
+    return InfluxSettings(**config_data)
 
 
-settings = load_config()
+def load_fastapi_config() -> FastAPISettings:
+    with open("config/fastapi_config.yaml", "r") as file:
+        config_data = yaml.safe_load(file)
+    return FastAPISettings(**config_data)
+
+
+def load_tags_config():
+    with open("config/tags_metadata.yaml", "r") as file:
+        config_data = yaml.safe_load(file)
+    return config_data
+
+
+influx_settings = load_influx_config()
+fastapi_settings = load_fastapi_config()
+tags_metadata = load_tags_config()
