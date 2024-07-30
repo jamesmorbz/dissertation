@@ -44,6 +44,7 @@ class SummarySet:
 # TODO can play around with time truncation if we ever need
 # |> truncateTimeColumn(unit: {interval})
 # TODO use start_timestamp
+# TODO  |> fill(usePrevious: true)
 
 
 @router.get(
@@ -70,6 +71,7 @@ async def get_device_data(
         |> filter(fn: (r) => r["hardware_name"] == "{device_id}")
         |> aggregateWindow(every: {interval}, fn: {aggregation}, createEmpty: true)
         |> map(fn: (r) => ({{ r with _unix: uint(v: r._time) }}))
+        |> fill(value: 0)
     """
     response: TableList = query_api.query(query)
     data = json.loads(response.to_json(["_unix", "_value", "_time"]))[1:-1]
@@ -103,7 +105,7 @@ async def get_device_daily_data(
     return {"device_name": device_id, "data": data}
 
 
-@router.get(  # TODO - I don't know what's happening with the routes
+@router.get(
     "/daily_data",
     response_model=List[Dataset],
     tags=["Summary", "Device"],

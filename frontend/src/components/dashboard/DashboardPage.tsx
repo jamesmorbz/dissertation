@@ -38,7 +38,7 @@ function DashboardPage() {
     const fetchData = async () => {
       try {
         const response = await axios.get<DataProps>(
-          `http://localhost:8000/data/${selectedDevice}`,
+          `http://localhost:8000/data/device/${selectedDevice}?lookback=6h`,
         );
         setData(response.data);
         setLastPoll(new Date().toISOString());

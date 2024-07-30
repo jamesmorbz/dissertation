@@ -8,6 +8,7 @@ router = APIRouter()
 class DataPoint:
     timestamp: int
     power: int
+    tag: str  # real point or extrapolated point (e.g extrapolated can be dotted line in frontend)
 
 
 @router.get(
