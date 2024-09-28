@@ -14,6 +14,11 @@ function DashboardPage() {
   const [lastPoll, setLastPoll] = useState<string>(new Date().toISOString());
   const [devices, setDevices] = useState<Device[]>([]);
   const [selectedDevice, setSelectedDevice] = useState<string>('');
+  const [lookback, setLookbackOption] = useState<string>('6h');
+  const [interval, setIntervalOption] = useState<string>('12h');
+
+  const lookback_options = ['1h', '6h', '12h', '24h', '2d', '7d', '30d'];
+  const interval_options = ['1m', '10m', '30m', '1h', '6h', '12h', '1d', '7d'];
 
   useEffect(() => {
     const getDevices = async () => {
@@ -38,7 +43,7 @@ function DashboardPage() {
     const fetchData = async () => {
       try {
         const response = await axios.get<DataProps>(
-          `http://localhost:8000/data/device/${selectedDevice}?lookback=6h`,
+          `http://localhost:8000/data/device/${selectedDevice}?lookback=${lookback}&interval=${interval}`,
         );
         setData(response.data);
         setLastPoll(new Date().toISOString());
@@ -50,7 +55,7 @@ function DashboardPage() {
 
     const intervalId = setInterval(fetchData, 30000); // Update every 30 seconds
     return () => clearInterval(intervalId); // Clean up interval on component unmount
-  }, [selectedDevice]);
+  }, [selectedDevice, interval, lookback]);
 
   return (
     <div>
@@ -60,8 +65,20 @@ function DashboardPage() {
         onChange={(value) => setSelectedDevice(value as string)}
         data={devices.map((device) => ({
           value: device.hardware_name,
-          label: device.friendly_name,
+          label: `${device.friendly_name} (${device.hardware_name})`,
         }))}
+      />
+      <Select
+        label="Select Lookback"
+        value={lookback}
+        onChange={(value) => setLookbackOption(value as string)}
+        data={lookback_options}
+      />
+      <Select
+        label="Select Interval"
+        value={interval}
+        onChange={(value) => setIntervalOption(value as string)}
+        data={interval_options}
       />
       <h3>{selectedDevice}</h3>
       {data ? <Chart {...data} /> : <p>Loading data...</p>}
@@ -73,10 +90,22 @@ function DashboardPage() {
         h="100%" // TODO: 50% w/ cols 4
         style={{ overflow: 'hidden' }}
       >
-        <DeviceOnlineCard devices_online={devices.length}></DeviceOnlineCard>
-        <DeviceOnlineCard devices_online={devices.length}></DeviceOnlineCard>
-        <DeviceOnlineCard devices_online={devices.length}></DeviceOnlineCard>
-        <DeviceOnlineCard devices_online={devices.length}></DeviceOnlineCard>
+        <DeviceOnlineCard
+          devices_online={devices.length}
+          devices_registered={devices.length}
+        ></DeviceOnlineCard>
+        <DeviceOnlineCard
+          devices_online={devices.length}
+          devices_registered={devices.length}
+        ></DeviceOnlineCard>
+        <DeviceOnlineCard
+          devices_online={devices.length}
+          devices_registered={devices.length}
+        ></DeviceOnlineCard>
+        <DeviceOnlineCard
+          devices_online={devices.length}
+          devices_registered={devices.length}
+        ></DeviceOnlineCard>
       </SimpleGrid>
     </div>
   );

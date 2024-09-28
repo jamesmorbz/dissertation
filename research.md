@@ -1,4 +1,4 @@
-# Smart Plug/Electricty Research
+# Smart Plug/Electricity Research
 
 ## LocalBytes Plugs:
 
