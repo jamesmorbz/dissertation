@@ -58,17 +58,29 @@ python main.py
 
 ## InfluxDB
 
-For storing timeseries data we've chosen InfluxDB to get this running locally:
+For storing timeseries data we've chosen InfluxDB. To get this running locally:
 
+MacOS:
 ```bash
 brew install influxdb
 brew install influxdb-cli
 ```
+Windows:
+Download the Zip File from: Influx [Official Website](https://docs.influxdata.com/influxdb/v2/install/?t=Windows)
+```powershell
+Expand-Archive 'D:\Downloads\influxdb2-2.7.10-windows.zip' -DestinationPath 'C:\Program Files\InfluxData\'
+```
 
 Then you simply need to run:
 
+MacOS/Linux:
 ```bash
 influxd
+```
+Windows:
+```powershell
+cd -Path 'C:\Program Files\InfluxData'
+./influxd
 ```
 
 which will start a local instance of the database on localhost:8086

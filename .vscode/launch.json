@@ -19,6 +19,13 @@
             "module": "uvicorn",
             "args": ["main:app","--reload"],
             "cwd": "${workspaceFolder}/backend"
+        },
+        {
+            "name": "MQTT Scraper",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "write_mqtt_to_influx.py",
+            "cwd": "${workspaceFolder}/backend"
         }
     ]
 }
