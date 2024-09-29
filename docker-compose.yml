@@ -1,0 +1,74 @@
+version: '3'
+services:
+  plug_wizard:
+    build: ./plug_wizard
+    restart: always
+
+  influxdb:
+    image: influxdb:2.7.10
+    restart: always
+    ports:
+      - "8086:8086"
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=admin_password
+      - DOCKER_INFLUXDB_INIT_ORG=diss
+      - DOCKER_INFLUXDB_INIT_BUCKET=metrics
+      # - DOCKER_INFLUXDB_INIT_RETENTION=7d
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-secret-token
+    volumes:
+      - ./influxdb:/var/lib/influxdb2
+
+  postgres:
+    image: postgres:17.0
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=mydatabase
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+
+  mqtt:
+    image: eclipse-mosquitto:2.0.18
+    restart: always
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    depends_on:
+      - influxdb
+
+  mqtt_scraper:
+    build: ./mqtt_scraper
+    restart: always
+    depends_on:
+      - mqtt
+
+  backend:
+    build: ./backend
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - influxdb
+      - postgres
+      - mqtt
+
+  frontend:
+    build: ./frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+
+
+
+

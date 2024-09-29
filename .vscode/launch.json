@@ -11,6 +11,7 @@
             "cwd": "${workspaceFolder}/frontend",
             "runtimeExecutable": "npm",
             "runtimeArgs": ["start"],
+            "console": "integratedTerminal"
         },
         {
             "name": "Backend",
@@ -18,14 +19,24 @@
             "request": "launch",
             "module": "uvicorn",
             "args": ["main:app","--reload"],
-            "cwd": "${workspaceFolder}/backend"
+            "cwd": "${workspaceFolder}/backend",
+            "console": "integratedTerminal"
         },
         {
             "name": "MQTT Scraper",
             "type": "debugpy",
             "request": "launch",
             "program": "write_mqtt_to_influx.py",
-            "cwd": "${workspaceFolder}/backend"
+            "cwd": "${workspaceFolder}/backend",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "AutoPlugConfiguration",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "automatic_smartplug_config.py",
+            "cwd": "${workspaceFolder}/misc",
+            "console": "integratedTerminal"
         }
     ]
 }
