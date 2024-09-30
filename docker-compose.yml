@@ -1,4 +1,3 @@
-version: '3'
 services:
   plug_wizard:
     build: ./plug_wizard
