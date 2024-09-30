@@ -17,6 +17,7 @@
     "@mantine/tiptap": "^7.10.2",
     "@mantine/vanilla-extract": "^7.10.2",
     "@mantinex/mantine-logo": "^1.0.1",
+    "@tabler/core": "^1.0.0-beta21",
     "@tabler/icons-react": "^3.6.0",
     "@tanstack/react-router": "^1.38.1",
     "@tanstack/router-vite-plugin": "^1.38.0",
@@ -43,7 +44,6 @@
     "react-helmet": "^6.1.0",
     "react-router-dom": "^6.23.1",
     "recharts": "^2.13.0-alpha.1",
-    "tabler": "^1.0.0-alpha.8",
     "vite": "^5.3.1",
     "vite-plugin-svgr": "^4.2.0",
     "vite-tsconfig-paths": "^4.3.2",
@@ -77,11 +77,11 @@
   "devDependencies": {
     "@types/css-modules": "^1.0.5",
     "@types/react-helmet": "^6.1.11",
-    "@vitest/coverage-v8": "^1.6.0",
+    "@vitest/coverage-v8": "^2.1.1",
     "jsdom": "^24.1.0",
     "postcss": "^8.4.38",
     "postcss-preset-mantine": "^1.15.0",
     "postcss-simple-vars": "^7.0.1",
-    "vitest": "^1.6.0"
+    "vitest": "^2.1.1"
   }
 }
