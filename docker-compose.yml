@@ -1,7 +1,7 @@
 services:
-  plug_wizard:
-    build: ./plug_wizard
-    restart: always
+  # plug_wizard:
+  #   build: ./plug_wizard
+  #   restart: always
 
   influxdb:
     image: influxdb:2.7.10
@@ -17,7 +17,7 @@ services:
       # - DOCKER_INFLUXDB_INIT_RETENTION=7d
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-secret-token
     volumes:
-      - ./influxdb:/var/lib/influxdb2
+      - ./diss-docker/influxdb:/var/lib/influxdb2
 
   postgres:
     image: postgres:17.0
@@ -29,7 +29,7 @@ services:
       - POSTGRES_PASSWORD=mypassword
       - POSTGRES_DB=mydatabase
     volumes:
-      - ./postgres:/var/lib/postgresql/data
+      - ./diss-docker/postgres:/var/lib/postgresql/data
 
   mqtt:
     image: eclipse-mosquitto:2.0.18
@@ -37,9 +37,9 @@ services:
     ports:
       - "1883:1883"
     volumes:
-      - ./mosquitto/config:/mosquitto/config
-      - ./mosquitto/data:/mosquitto/data
-      - ./mosquitto/log:/mosquitto/log
+      - ./diss-docker/mosquitto/config:/mosquitto/config
+      - ./diss-docker/mosquitto/data:/mosquitto/data
+      - ./diss-docker/mosquitto/log:/mosquitto/log
     depends_on:
       - influxdb
 
@@ -63,7 +63,7 @@ services:
     build: ./frontend
     restart: always
     ports:
-      - "5173:5173"
+      - "5000:5000"
     depends_on:
       - backend
 

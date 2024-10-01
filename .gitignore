@@ -29,3 +29,5 @@ lerna-debug.log*
 
 venv
 __pycache__
+
+diss-docker

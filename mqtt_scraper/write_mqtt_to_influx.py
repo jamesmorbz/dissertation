@@ -7,9 +7,9 @@ import json
 
 counter = 0
 # token = "_VvTdkvnwyYzmHdyq-LE9R1lvrdM_aNO3q06es7EswjFgMK6UHByit1HWyiAZO3m4JLC0bHN6rJsU_ossUTJSA=="
-token = "Yp15tKjyFa-fz4NWJXsf0Q6SG0UlwZr7hzke-UAqweGwtdGv5TvEpjoxswPWgRCIEXz3RMh7v2ZfxxfLSNMuBg=="
+token = "my-secret-token"
 org = "diss"
-url = "http://localhost:8086"
+url = "http://0.0.0.0:8086"
 
 client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
 bucket = "metrics"
@@ -87,5 +87,5 @@ mqttc.on_message = on_message
 
 if __name__ == "__main__":
     logging.basicConfig(format="%(asctime)s %(message)s", level=logging.INFO)
-    mqttc.connect("mqtt.eclipseprojects.io", 1883, 60)
+    mqttc.connect("mqtt", 1883, 60)
     mqttc.loop_forever()

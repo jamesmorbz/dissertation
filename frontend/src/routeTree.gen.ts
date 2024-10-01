@@ -101,14 +101,83 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren({
-  DashboardRoute,
-  DataExplorerRoute,
-  DevicesRoute,
-  LogsRoute,
-  SchedulerRoute,
-  SettingsRoute,
-})
+export interface FileRoutesByFullPath {
+  '/dashboard': typeof DashboardRoute
+  '/data-explorer': typeof DataExplorerRoute
+  '/devices': typeof DevicesRoute
+  '/logs': typeof LogsRoute
+  '/scheduler': typeof SchedulerRoute
+  '/settings': typeof SettingsRoute
+}
+
+export interface FileRoutesByTo {
+  '/dashboard': typeof DashboardRoute
+  '/data-explorer': typeof DataExplorerRoute
+  '/devices': typeof DevicesRoute
+  '/logs': typeof LogsRoute
+  '/scheduler': typeof SchedulerRoute
+  '/settings': typeof SettingsRoute
+}
+
+export interface FileRoutesById {
+  __root__: typeof rootRoute
+  '/dashboard': typeof DashboardRoute
+  '/data-explorer': typeof DataExplorerRoute
+  '/devices': typeof DevicesRoute
+  '/logs': typeof LogsRoute
+  '/scheduler': typeof SchedulerRoute
+  '/settings': typeof SettingsRoute
+}
+
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths:
+    | '/dashboard'
+    | '/data-explorer'
+    | '/devices'
+    | '/logs'
+    | '/scheduler'
+    | '/settings'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/dashboard'
+    | '/data-explorer'
+    | '/devices'
+    | '/logs'
+    | '/scheduler'
+    | '/settings'
+  id:
+    | '__root__'
+    | '/dashboard'
+    | '/data-explorer'
+    | '/devices'
+    | '/logs'
+    | '/scheduler'
+    | '/settings'
+  fileRoutesById: FileRoutesById
+}
+
+export interface RootRouteChildren {
+  DashboardRoute: typeof DashboardRoute
+  DataExplorerRoute: typeof DataExplorerRoute
+  DevicesRoute: typeof DevicesRoute
+  LogsRoute: typeof LogsRoute
+  SchedulerRoute: typeof SchedulerRoute
+  SettingsRoute: typeof SettingsRoute
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  DashboardRoute: DashboardRoute,
+  DataExplorerRoute: DataExplorerRoute,
+  DevicesRoute: DevicesRoute,
+  LogsRoute: LogsRoute,
+  SchedulerRoute: SchedulerRoute,
+  SettingsRoute: SettingsRoute,
+}
+
+export const routeTree = rootRoute
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
 
 /* prettier-ignore-end */
 

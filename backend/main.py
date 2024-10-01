@@ -10,6 +10,8 @@ app = FastAPI(openapi_tags=tags_metadata)
 origins = [
     "http://localhost:5173",  # Vite Default Port
     "http://127.0.0.1:5173",  # Vite Default Port
+    "http://localhost:5000",  # PROD Port
+    "http://127.0.0.1:5000",  # PROD Port
 ]
 app.add_middleware(
     CORSMiddleware,

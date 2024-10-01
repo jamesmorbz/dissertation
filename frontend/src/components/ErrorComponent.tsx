@@ -9,6 +9,7 @@ import {
   Title,
 } from '@mantine/core';
 import { useNavigate } from '@tanstack/react-router';
+import React from 'react';
 
 export default function ErrorComponent({ error }: { error: unknown }) {
   const navigate = useNavigate();
@@ -17,13 +18,13 @@ export default function ErrorComponent({ error }: { error: unknown }) {
     <Stack p="md">
       <Title>An error occurred</Title>
       {error instanceof Error ? (
-        <>
+        <React.Fragment>
           <Text>
-            <b>{error.name}:</b> {error.message}
+            <b>{error.name}:</b> {String(error.message)}
           </Text>
-          <Code>{error.stack}</Code>
-          {error.cause}
-        </>
+          <Code>{String(error.stack)}</Code>
+          {<Text>{String(error.cause as string)}</Text>}
+        </React.Fragment>
       ) : (
         <Text>
           <b>Unexpected Error:</b> {JSON.stringify(error)}
@@ -34,14 +35,14 @@ export default function ErrorComponent({ error }: { error: unknown }) {
           <CopyButton value={`${error.message}\n${error.stack}`}>
             {({ copied, copy }) => (
               <Button color={copied ? 'teal' : undefined} onClick={copy}>
-                {copied ? 'Copied' : 'Copy stack strace'}
+                {copied ? 'Copied' : 'Copy stack trace'}
               </Button>
             )}
           </CopyButton>
         )}
         <Button
           onClick={() =>
-            navigate({ to: '/' }).then(() => window.location.reload())
+            navigate({ to: '.' }).then(() => window.location.reload())
           }
         >
           Reload
