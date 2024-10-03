@@ -18,6 +18,11 @@ services:
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-secret-token
     volumes:
       - ./diss-docker/influxdb:/var/lib/influxdb2
+    # healthcheck:
+    #   test: ["CMD", "curl", "-sS", "http://localhost:8086/health"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 5
 
   postgres:
     image: postgres:17.0
@@ -25,11 +30,16 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=myuser
+      - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=mypassword
-      - POSTGRES_DB=mydatabase
+      - POSTGRES_DB=admin
     volumes:
       - ./diss-docker/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d admin"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   mqtt:
     image: eclipse-mosquitto:2.0.18
@@ -37,9 +47,10 @@ services:
     ports:
       - "1883:1883"
     volumes:
-      - ./diss-docker/mosquitto/config:/mosquitto/config
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
       - ./diss-docker/mosquitto/data:/mosquitto/data
       - ./diss-docker/mosquitto/log:/mosquitto/log
+
     depends_on:
       - influxdb
 

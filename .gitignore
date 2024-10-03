@@ -31,3 +31,6 @@ venv
 __pycache__
 
 diss-docker
+
+**/dist
+*.tsbuildinfo
