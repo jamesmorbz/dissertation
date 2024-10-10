@@ -5,4 +5,4 @@ COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app/
 
-CMD ["python", "write_mqtt_to_influx.py"]
+CMD ["python", "push_to_fluent.py"]

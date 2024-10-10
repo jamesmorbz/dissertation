@@ -41,6 +41,15 @@ services:
       timeout: 10s
       retries: 5
 
+  fluentbit:
+    image: fluent/fluent-bit:3.1.9
+    ports:
+      - "24224:24224"
+    volumes:
+      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+    depends_on:
+      - influxdb
+
   mqtt:
     image: eclipse-mosquitto:2.0.18
     restart: always
@@ -53,12 +62,14 @@ services:
 
     depends_on:
       - influxdb
+      - fluentbit
 
   mqtt_scraper:
     build: ./mqtt_scraper
     restart: always
     depends_on:
       - mqtt
+      - fluentbit
 
   backend:
     build: ./backend
@@ -78,7 +89,12 @@ services:
     depends_on:
       - backend
 
-
+volumes:
+  influxdb-data:  # Named volume for InfluxDB data
+  postgres-data:  # Named volume for Postgres data
+  fluentd-log:    # Named volume for Fluentd logs
+  mosquitto-data: # Named volume for Mosquitto data
+  mosquitto-log:  # Named volume for Mosquitto logs
 
 
 

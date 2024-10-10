@@ -27,15 +27,15 @@
             "type": "debugpy",
             "request": "launch",
             "program": "write_mqtt_to_influx.py",
-            "cwd": "${workspaceFolder}/backend",
+            "cwd": "${workspaceFolder}/mqtt_scraper",
             "console": "integratedTerminal"
         },
         {
             "name": "AutoPlugConfiguration",
             "type": "debugpy",
             "request": "launch",
-            "program": "automatic_smartplug_config.py",
-            "cwd": "${workspaceFolder}/misc",
+            "program": "plug_wizard.py",
+            "cwd": "${workspaceFolder}/plug_wizard",
             "console": "integratedTerminal"
         }
     ]
