@@ -1,27 +1,42 @@
 from fastapi import APIRouter, HTTPException
 import requests
+from pydantic import BaseModel
 
 router = APIRouter()
 
 
-@router.post(
+class MqttPayload(BaseModel):
+    device_id: str
+    command: str
+    parameter: str = ""
+
+
+class Command:
+    POWER = "Power"
+
+
+class Parameter:
+    TOGGLE = "TOGGLE"
+
+
+@router.put(
     "/{device_id}/TOGGLE_POWER",
     tags=["Device"],
     summary="Toggle the power of a device on/off",
 )
-async def toggle_power(device_id):
-    DUMMY_LOCAL_IP = "192.168.8.164"
-    requests.get(f"http://{DUMMY_LOCAL_IP}/cm?cmnd=Power%20TOGGLE")
-    return
+async def toggle_power(device_id: str):
+    CONTROLLER_URL = "http://plug-controller:3000/action"
+    data = {
+        "device_id": device_id,
+        "command": Command.POWER,
+        "parameter": Parameter.TOGGLE,
+    }
+    response = requests.put(CONTROLLER_URL, json=data)
 
-
-@router.put("/{device_id}/COMMAND", summary="Issue a command to the device")
-async def update_telemetry_frequency(device_id, frequency: int, tags=["Device"]):
-    if frequency < 10 or frequency > 3600:
+    if response.status_code != 200:
         raise HTTPException(
-            status_code=400,
-            detail="TelePeriod cannot be greater than 3600 or less than 10",
+            status_code=response.status_code,
+            detail="Failed to forward action to Controller",
         )
-    # DUMMY_LOCAL_IP = "192.168.8.164"
-    # requests.get(f"http://{DUMMY_LOCAL_IP}/cm?cmnd=TelePeriod%20{frequency}")
-    return
+
+    return {"response": f"Forwarded action for {device_id} to Controller"}

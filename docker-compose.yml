@@ -1,6 +1,6 @@
 services:
-  # plug_wizard:
-  #   build: ./plug_wizard
+  # plug-wizard:
+  #   build: ./plug-wizard
   #   restart: always
 
   influxdb:
@@ -64,12 +64,20 @@ services:
       - influxdb
       - fluentbit
 
-  mqtt_scraper:
-    build: ./mqtt_scraper
+  mqtt-scraper:
+    build: ./mqtt-scraper
     restart: always
     depends_on:
       - mqtt
       - fluentbit
+
+  plug-controller:
+    build: ./plug-controller
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mqtt
 
   backend:
     build: ./backend

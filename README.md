@@ -61,12 +61,15 @@ python main.py
 For storing timeseries data we've chosen InfluxDB. To get this running locally:
 
 MacOS:
+
 ```bash
 brew install influxdb
 brew install influxdb-cli
 ```
+
 Windows:
 Download the Zip File from: Influx [Official Website](https://docs.influxdata.com/influxdb/v2/install/?t=Windows)
+
 ```powershell
 Expand-Archive 'D:\Downloads\influxdb2-2.7.10-windows.zip' -DestinationPath 'C:\Program Files\InfluxData\'
 ```
@@ -74,10 +77,13 @@ Expand-Archive 'D:\Downloads\influxdb2-2.7.10-windows.zip' -DestinationPath 'C:\
 Then you simply need to run:
 
 MacOS/Linux:
+
 ```bash
 influxd
 ```
+
 Windows:
+
 ```powershell
 cd -Path 'C:\Program Files\InfluxData'
 ./influxd
@@ -94,6 +100,13 @@ While we use InfluxDB for storing timeseries data there are datasets that are no
 We will still have a relational database which we use for metadata and various other uses.
 
 For now this is SQLite which can be setup using the Automated Scripts below however we may move this to PostrgresSQL in the future.
+
+# Terraform - IaC
+
+```
+brew tap hashicorp/tap
+brew install hashicorp/tap/terraform
+```
 
 # Developer Experience (CI)
 
