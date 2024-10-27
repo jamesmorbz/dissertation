@@ -117,7 +117,7 @@ async def devices_current_state(
     query = f"""
     from(bucket: "metrics")
         |> range(start: -30d)
-        |> filter(fn: (r) => r["_measurement"] == "status")
+        |> filter(fn: (r) => r["_measurement"] == "fluentbit.status")
         |> filter(fn: (r) => r["_field"] == "power" or r["_field"] == "uptime" or r["_field"] == "wifi_rssi" or r["_field"] == "wifi_signal")
         |> last()
     """

@@ -103,6 +103,3 @@ volumes:
   fluentd-log:    # Named volume for Fluentd logs
   mosquitto-data: # Named volume for Mosquitto data
   mosquitto-log:  # Named volume for Mosquitto logs
-
-
-

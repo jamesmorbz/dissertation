@@ -14,11 +14,11 @@ function DashboardPage() {
   const [lastPoll, setLastPoll] = useState<string>(new Date().toISOString());
   const [devices, setDevices] = useState<Device[]>([]);
   const [selectedDevice, setSelectedDevice] = useState<string>('');
-  const [lookback, setLookbackOption] = useState<string>('6h');
-  const [interval, setIntervalOption] = useState<string>('12h');
+  const [lookback, setLookbackOption] = useState<string>('30m');
+  const [interval, setIntervalOption] = useState<string>('1m');
 
-  const lookback_options = ['1h', '6h', '12h', '24h', '2d', '7d', '30d'];
-  const interval_options = ['1m', '10m', '30m', '1h', '6h', '12h', '1d', '7d'];
+  const lookback_options = ['10m', '1h', '6h', '12h', '24h', '2d', '7d'];
+  const interval_options = ['1m', '10m', '30m', '1h'];
 
   useEffect(() => {
     const getDevices = async () => {

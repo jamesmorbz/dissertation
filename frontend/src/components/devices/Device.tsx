@@ -39,7 +39,7 @@ async function togglePower(hardware_name: string) {
     console.log(
       `Calling http://127.0.0.1:8000/controller/${hardware_name}/TOGGLE_POWER`,
     );
-    const response = await axios.post(
+    const response = await axios.put(
       `http://127.0.0.1:8000/controller/${hardware_name}/TOGGLE_POWER`,
     ); // Could pop up a toast notification?
     // In future this could become a POST with a {"COMMAND": "TOGGLE_POWER"} as we could extend

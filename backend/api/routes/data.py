@@ -66,12 +66,12 @@ async def get_device_data(
     query = f"""
     from(bucket: "metrics")
         |> range(start: -{lookback})
-        |> filter(fn: (r) => r["_measurement"] == "wattage")
+        |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
         |> filter(fn: (r) => r["_field"] == "power")
         |> filter(fn: (r) => r["hardware_name"] == "{device_id}")
         |> aggregateWindow(every: {interval}, fn: {aggregation}, createEmpty: true)
         |> map(fn: (r) => ({{ r with _unix: uint(v: r._time) }}))
-        |> fill(value: 0)
+        |> fill(value: 0.0)
     """
     response: TableList = query_api.query(query)
     data = json.loads(response.to_json(["_unix", "_value", "_time"]))[1:-1]
@@ -94,7 +94,7 @@ async def get_device_daily_data(
     query = f"""
         from(bucket: "metrics")
         |> range(start: -{lookback_days}d)
-        |> filter(fn: (r) => r["_measurement"] == "wattage")
+        |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
         |> filter(fn: (r) => r["_field"] == "power")
         |> filter(fn: (r) => r["hardware_name"] == "{device_id}")
         |> aggregateWindow(every: 1d, fn: sum, createEmpty: true)
@@ -119,7 +119,7 @@ async def get_daily_data(
     query = f"""
         from(bucket: "metrics")
         |> range(start: -{lookback_days}d)
-        |> filter(fn: (r) => r["_measurement"] == "wattage")
+        |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
         |> filter(fn: (r) => r["_field"] == "power")
         |> aggregateWindow(every: 1d, fn: sum, createEmpty: true)
         |> map(fn: (r) => ({{ r with _unix: uint(v: r._time) }}))
