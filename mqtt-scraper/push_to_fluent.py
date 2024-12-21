@@ -71,9 +71,9 @@ def on_connect(client, userdata, flags, reason_code, properties):
 
 if __name__ == "__main__":
     logging.basicConfig(format="%(asctime)s %(message)s", level=logging.INFO)
-    mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
-    mqttc.on_connect = on_connect
-    mqttc.on_message = on_message
-    mqttc.connect("mqtt", 1883, 60)
-    mqttc.loop_forever()
+    mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+    mqtt_client.on_connect = on_connect
+    mqtt_client.on_message = on_message
+    mqtt_client.connect("mqtt", 1883, 60)
+    mqtt_client.loop_forever()
     sender.close()
