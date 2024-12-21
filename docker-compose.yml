@@ -41,15 +41,6 @@ services:
       timeout: 10s
       retries: 5
 
-  fluentbit:
-    image: fluent/fluent-bit:3.1.9
-    ports:
-      - "24224:24224"
-    volumes:
-      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
-    depends_on:
-      - influxdb
-
   mqtt:
     image: eclipse-mosquitto:2.0.18
     restart: always
@@ -60,16 +51,17 @@ services:
       - ./diss-docker/mosquitto/data:/mosquitto/data
       - ./diss-docker/mosquitto/log:/mosquitto/log
 
-    depends_on:
-      - influxdb
-      - fluentbit
-
   mqtt-scraper:
     build: ./mqtt-scraper
     restart: always
     depends_on:
       - mqtt
-      - fluentbit
+
+  mock-plug-data-pusher:
+    build: ./mock-plug-data-pusher
+    restart: always
+    depends_on:
+      - mqtt
 
   plug-controller:
     build: ./plug-controller
@@ -79,6 +71,16 @@ services:
     depends_on:
       - mqtt
 
+  fluentbit:
+    image: fluent/fluent-bit:3.1.9
+    ports:
+      - "24224:24224"
+    volumes:
+      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+    depends_on:
+      - influxdb
+      - mqtt-scraper
+
   backend:
     build: ./backend
     restart: always
@@ -87,7 +89,6 @@ services:
     depends_on:
       - influxdb
       - postgres
-      - mqtt
 
   frontend:
     build: ./frontend
@@ -100,6 +101,6 @@ services:
 volumes:
   influxdb-data:  # Named volume for InfluxDB data
   postgres-data:  # Named volume for Postgres data
-  fluentd-log:    # Named volume for Fluentd logs
+  fluentbit-log:    # Named volume for Fluentd logs
   mosquitto-data: # Named volume for Mosquitto data
   mosquitto-log:  # Named volume for Mosquitto logs
