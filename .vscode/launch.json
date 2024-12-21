@@ -37,6 +37,14 @@
             "program": "plug_wizard.py",
             "cwd": "${workspaceFolder}/plug_wizard",
             "console": "integratedTerminal"
+        },        
+        {
+            "name": "MockPlugData",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "push_to_mqtt.py",
+            "cwd": "${workspaceFolder}/mock-plug-data-pusher",
+            "console": "integratedTerminal"
         }
     ]
 }
