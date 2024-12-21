@@ -1,3 +1,11 @@
+# FROM golang:1.21
+
+# WORKDIR /app
+# COPY . ./
+# RUN go mod download
+# RUN go build mqtt-scraper
+# CMD ["./mqtt-scraper"]
+
 FROM python:3.12-slim
 
 WORKDIR /app
