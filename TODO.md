@@ -12,3 +12,4 @@
 * application integration paramount >> website - web based logins more painful no mobile notifs, only email notifs
 * Price changes over time if variable tariff
 * use average standard variable tarrif would be default but you can overwrite it with your amount - In settings enter price per kilowatt hour because you dont care about standing hour (e.g enter 22.51p/kwh)
+* notify if you left plugs on when you leave the home - location integration

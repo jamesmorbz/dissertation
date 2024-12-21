@@ -4,8 +4,9 @@ from pydantic.dataclasses import dataclass
 from typing import List
 from core.dependencies import get_influxdb_client
 from influxdb_client import InfluxDBClient
-import json
 from influxdb_client.client.flux_table import TableList
+from core.queries.influx_queries import InfluxDBQueries
+from utils.query_helper import InfluxHelper
 
 router = APIRouter()
 
@@ -39,7 +40,7 @@ class SummarySet:
     data: List[Summary]
 
 
-# TODO ensure these are the supported units of time supported  duration_lit        = int_lit duration_unit .
+# TODO ensure these are the supported units of time supported  duration_lit = int_lit duration_unit .
 # duration_unit       = "s" | "m" | "h" | "d" | "w" .
 # TODO can play around with time truncation if we ever need
 # |> truncateTimeColumn(unit: {interval})
@@ -61,21 +62,15 @@ async def get_device_data(
     aggregation: str = "max",
     influx_client: InfluxDBClient = Depends(get_influxdb_client),
 ):
-    query_api = influx_client.query_api()
-    # TODO how can I store influx queries in a more elegant way?
-    query = f"""
-    from(bucket: "metrics")
-        |> range(start: -{lookback})
-        |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
-        |> filter(fn: (r) => r["_field"] == "power")
-        |> filter(fn: (r) => r["hardware_name"] == "{device_id}")
-        |> aggregateWindow(every: {interval}, fn: {aggregation}, createEmpty: true)
-        |> map(fn: (r) => ({{ r with _unix: uint(v: r._time) }}))
-        |> fill(value: 0.0)
-    """
-    response: TableList = query_api.query(query)
-    data = json.loads(response.to_json(["_unix", "_value", "_time"]))[1:-1]
-    # TODO - currently removing -1 as the timestamp takes a different format and is skewed off the minute - this may have side effects
+
+    query = InfluxDBQueries.get_device_usage_query(
+        lookback, device_id, interval, aggregation
+    )
+    response: TableList = InfluxHelper.query_influx(influx_client, query)
+    fields = ["_unix", "_value", "_time"]
+    data = InfluxHelper.convert_resp_to_dict(response, fields)[
+        1:-1
+    ]  # TODO - currently removing -1 as the timestamp takes a different format and is skewed off the minute - this may have side effects
     return {"device_name": device_id, "data": data}
 
 
@@ -90,18 +85,11 @@ async def get_device_daily_data(
     lookback_days: int = 7,
     influx_client: InfluxDBClient = Depends(get_influxdb_client),
 ):
-    query_api = influx_client.query_api()
-    query = f"""
-        from(bucket: "metrics")
-        |> range(start: -{lookback_days}d)
-        |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
-        |> filter(fn: (r) => r["_field"] == "power")
-        |> filter(fn: (r) => r["hardware_name"] == "{device_id}")
-        |> aggregateWindow(every: 1d, fn: sum, createEmpty: true)
-        |> map(fn: (r) => ({{ r with _unix: uint(v: r._time) }}))
-    """
-    response: TableList = query_api.query(query)
-    data = json.loads(response.to_json(["_unix", "_value", "_time"]))
+    query = InfluxDBQueries.get_daily_aggregated_data_query(lookback_days, device_id)
+    response: TableList = InfluxHelper.query_influx(influx_client, query)
+    fields = ["_unix", "_value", "_time"]
+    data = InfluxHelper.convert_resp_to_dict(response, fields)
+
     return {"device_name": device_id, "data": data}
 
 
@@ -115,17 +103,11 @@ async def get_daily_data(
     lookback_days: int = 7,
     influx_client: InfluxDBClient = Depends(get_influxdb_client),
 ):
-    query_api = influx_client.query_api()
-    query = f"""
-        from(bucket: "metrics")
-        |> range(start: -{lookback_days}d)
-        |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
-        |> filter(fn: (r) => r["_field"] == "power")
-        |> aggregateWindow(every: 1d, fn: sum, createEmpty: true)
-        |> map(fn: (r) => ({{ r with _unix: uint(v: r._time) }}))
-    """
-    response: TableList = query_api.query(query)
-    rows = json.loads(response.to_json(["hardware_name", "_unix", "_value", "_time"]))
+    query = InfluxDBQueries.get_daily_aggregated_data_query(lookback_days)
+    response: TableList = InfluxHelper.query_influx(influx_client, query)
+    fields = ["hardware_name", "_unix", "_value", "_time"]
+    rows = InfluxHelper.convert_resp_to_dict(response, fields)
+
     data = {}
     for row in rows:
         device_name = row["hardware_name"]

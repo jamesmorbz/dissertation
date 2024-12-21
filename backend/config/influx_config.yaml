@@ -1,6 +1,6 @@
-url: http://influxdb:8086
+url: http://localhost:8086
 # token: _VvTdkvnwyYzmHdyq-LE9R1lvrdM_aNO3q06es7EswjFgMK6UHByit1HWyiAZO3m4JLC0bHN6rJsU_ossUTJSA== # TODO Example Token that will get rotated and stored in a better place
-token: orV6JejUVEMRuKOYl9__Ry6rXizWEE36cbqZ6anAMT2GkyhUJB4VbNBi9GCo4dAqjGZnBRFa01sxxe0pgU1opA== # Test Creds
+token: my-secret-token # Test Creds
 org: diss
 bucket: metrics
 debug: false

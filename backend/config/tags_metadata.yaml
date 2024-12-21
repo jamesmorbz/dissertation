@@ -21,6 +21,9 @@
 - name: Forecast
   description: Endpoints that will return forecast (predictive) data
 
+- name: User
+  description: Endpoints to authenticate user. Login, Sign-up and user detail updates
+
 - name: Controller
   description: For commands that are availible for devices flashed with Tasmota
   externalDocs:

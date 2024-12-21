@@ -1,10 +1,46 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
 from api.main import api_router
 import uvicorn
 from core.config import fastapi_settings, tags_metadata
 
-app = FastAPI(openapi_tags=tags_metadata)
+app = FastAPI()
+
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    openapi_schema = get_openapi(
+        title="Disseration",  # TODO: Store this config in yaml
+        version="1.0.0",
+        description="""Backend for Dissertation.
+                To authenticate, use the Authorize button at the top-right of the Swagger UI. \n
+                Provide a token in the format: `Bearer <your-token>`. \n
+                In order to get a token use the login API below.""",
+        routes=app.routes,
+        tags=tags_metadata,
+    )
+    openapi_schema["components"]["securitySchemes"] = {
+        "bearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+            "description": "Bearer <TOKEN>",
+        }
+    }
+    openapi_schema["security"] = [{"bearerAuth": []}]
+    for path, methods in openapi_schema["paths"].items():
+        for method in methods.values():
+            method["security"] = [
+                {"bearerAuth": []}
+            ]  # Attach BearerAuth to /devices paths
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi
 
 # Allow CORS for development
 origins = [
