@@ -1,0 +1,44 @@
+usage:
+  HIGH:
+    WATTAGE_MAX: 200
+    WATTAGE_MIN: 170
+    CURRENT_MAX: 8.7
+    CURRENT_MIN: 4.3
+  MEDIUM:
+    WATTAGE_MAX: 120
+    WATTAGE_MIN: 90
+    CURRENT_MAX: 3.5
+    CURRENT_MIN: 1.3
+  LOW:
+    WATTAGE_MAX: 20
+    WATTAGE_MIN: 0
+    CURRENT_MAX: 0.9
+    CURRENT_MIN: 0.2
+
+plugs:
+  - name: tasmota_XXX000
+    usage: HIGH
+    network_name: HyperOptic_ABC23142
+  - name: tasmota_XXX001
+    usage: HIGH
+    reliability: 80
+    network_name: HyperOptic_ABC23142
+  - name: tasmota_XXX002
+    usage: MEDIUM
+    network_name: HyperOptic_ABC23142
+  - name: tasmota_XXX003
+    usage: LOW
+    reliability: 90
+    network_name: HyperOptic_ABC23142
+  - name: tasmota_XXX004
+    usage: LOW
+    reliability: 60
+    usage_spikes: 10 # how many times out of 100 (percentage) usage spikes
+    network_name: HyperOptic_ABC23142
+  - name: tasmota_XXX005
+    usage: IDLE
+    reliability: 20
+    network_name: HyperOptic_ABC23142
+  - name: tasmota_XXX006
+    usage: MEDIUM
+    network_name: HyperOptic_ABC23142
