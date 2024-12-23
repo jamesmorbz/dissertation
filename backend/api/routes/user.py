@@ -11,7 +11,6 @@ from utils.user import (
     get_user_by_email,
     authenticate_user,
     create_jwt_token,
-    verify_jwt_token,
     hash_password,
     get_current_user,
 )
@@ -80,7 +79,11 @@ def login_for_access_token(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if not user.active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,  # TODO: Implement account active defaulting to false
+            detail="Account is not yet activated. Please check your inbox and press the activation link!",
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_jwt_token(
@@ -93,9 +96,11 @@ def login_for_access_token(
     }
 
 
-@router.get("/verify-token/{token}")
-async def verify_user_token(token: str):
-    return verify_jwt_token(token)
+@router.get("/current-user")
+def update_user_attributes(
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    return current_user
 
 
 @router.put("/update")
