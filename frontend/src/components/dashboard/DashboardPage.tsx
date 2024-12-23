@@ -1,5 +1,5 @@
 import { Chart, DataProps } from './Chart';
-import axios from 'axios';
+import apiClient from '../../helpers/api-client';
 import React, { useEffect, useState } from 'react';
 import { Card, SimpleGrid, Stack, Title, Select } from '@mantine/core';
 import { DeviceOnlineCard } from './DeviceOnlineCard';
@@ -17,13 +17,13 @@ function DashboardPage() {
   const [lookback, setLookbackOption] = useState<string>('30m');
   const [interval, setIntervalOption] = useState<string>('1m');
 
-  const lookback_options = ['10m', '1h', '6h', '12h', '24h', '2d', '7d'];
-  const interval_options = ['1m', '10m', '30m', '1h'];
+  const lookback_options = ['1m', '10m', '1h', '6h', '12h', '24h', '2d', '7d'];
+  const interval_options = ['5s', '1m', '10m', '30m', '1h'];
 
   useEffect(() => {
     const getDevices = async () => {
       try {
-        const response = await axios.get<Device[]>(
+        const response = await apiClient.get<Device[]>(
           'http://localhost:8000/devices',
         );
         setDevices(response.data);
@@ -42,7 +42,7 @@ function DashboardPage() {
 
     const fetchData = async () => {
       try {
-        const response = await axios.get<DataProps>(
+        const response = await apiClient.get<DataProps>(
           `http://localhost:8000/data/device/${selectedDevice}?lookback=${lookback}&interval=${interval}`,
         );
         setData(response.data);

@@ -1,7 +1,7 @@
 import { Card, SimpleGrid, Stack, Title } from '@mantine/core';
 import { Device, DeviceProps } from './Device';
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import apiClient from '../../helpers/api-client';
 
 function DevicesPage() {
   const [devices, setDevices] = useState<DeviceProps[]>([]);
@@ -9,7 +9,7 @@ function DevicesPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get<DeviceProps[]>(
+        const response = await apiClient.get<DeviceProps[]>(
           'http://127.0.0.1:8000/devices/current_state',
         );
         setDevices(response.data);

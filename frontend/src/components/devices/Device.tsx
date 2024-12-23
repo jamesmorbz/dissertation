@@ -1,17 +1,7 @@
-import {
-  ActionIcon,
-  Card,
-  Group,
-  Loader,
-  Progress,
-  Stack,
-  Text,
-  Badge,
-} from '@mantine/core';
+import { ActionIcon, Card, Group, Stack, Text, Badge } from '@mantine/core';
 import {
   IconRefresh,
   IconX,
-  IconPlug,
   IconCheck,
   IconDeviceMobile,
   IconWifi,
@@ -20,7 +10,7 @@ import {
   IconPower,
 } from '@tabler/icons-react';
 import * as classes from './styles.css';
-import axios from 'axios';
+import apiClient from '../../helpers/api-client';
 
 export interface DeviceProps {
   friendly_name: string;
@@ -39,7 +29,7 @@ async function togglePower(hardware_name: string) {
     console.log(
       `Calling http://127.0.0.1:8000/controller/${hardware_name}/TOGGLE_POWER`,
     );
-    const response = await axios.put(
+    const response = await apiClient.put(
       `http://127.0.0.1:8000/controller/${hardware_name}/TOGGLE_POWER`,
     ); // Could pop up a toast notification?
     // In future this could become a POST with a {"COMMAND": "TOGGLE_POWER"} as we could extend

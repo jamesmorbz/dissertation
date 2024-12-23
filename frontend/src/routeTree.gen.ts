@@ -14,6 +14,7 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as SettingsImport } from './routes/settings'
 import { Route as SchedulerImport } from './routes/scheduler'
 import { Route as LogsImport } from './routes/logs'
+import { Route as LoginImport } from './routes/login'
 import { Route as DevicesImport } from './routes/devices'
 import { Route as DataExplorerImport } from './routes/data-explorer'
 import { Route as DashboardImport } from './routes/dashboard'
@@ -32,6 +33,11 @@ const SchedulerRoute = SchedulerImport.update({
 
 const LogsRoute = LogsImport.update({
   path: '/logs',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const LoginRoute = LoginImport.update({
+  path: '/login',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -75,6 +81,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DevicesImport
       parentRoute: typeof rootRoute
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginImport
+      parentRoute: typeof rootRoute
+    }
     '/logs': {
       id: '/logs'
       path: '/logs'
@@ -105,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/data-explorer': typeof DataExplorerRoute
   '/devices': typeof DevicesRoute
+  '/login': typeof LoginRoute
   '/logs': typeof LogsRoute
   '/scheduler': typeof SchedulerRoute
   '/settings': typeof SettingsRoute
@@ -114,6 +128,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/data-explorer': typeof DataExplorerRoute
   '/devices': typeof DevicesRoute
+  '/login': typeof LoginRoute
   '/logs': typeof LogsRoute
   '/scheduler': typeof SchedulerRoute
   '/settings': typeof SettingsRoute
@@ -124,6 +139,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/data-explorer': typeof DataExplorerRoute
   '/devices': typeof DevicesRoute
+  '/login': typeof LoginRoute
   '/logs': typeof LogsRoute
   '/scheduler': typeof SchedulerRoute
   '/settings': typeof SettingsRoute
@@ -135,6 +151,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/data-explorer'
     | '/devices'
+    | '/login'
     | '/logs'
     | '/scheduler'
     | '/settings'
@@ -143,6 +160,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/data-explorer'
     | '/devices'
+    | '/login'
     | '/logs'
     | '/scheduler'
     | '/settings'
@@ -151,6 +169,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/data-explorer'
     | '/devices'
+    | '/login'
     | '/logs'
     | '/scheduler'
     | '/settings'
@@ -161,6 +180,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   DataExplorerRoute: typeof DataExplorerRoute
   DevicesRoute: typeof DevicesRoute
+  LoginRoute: typeof LoginRoute
   LogsRoute: typeof LogsRoute
   SchedulerRoute: typeof SchedulerRoute
   SettingsRoute: typeof SettingsRoute
@@ -170,6 +190,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   DataExplorerRoute: DataExplorerRoute,
   DevicesRoute: DevicesRoute,
+  LoginRoute: LoginRoute,
   LogsRoute: LogsRoute,
   SchedulerRoute: SchedulerRoute,
   SettingsRoute: SettingsRoute,
@@ -190,6 +211,7 @@ export const routeTree = rootRoute
         "/dashboard",
         "/data-explorer",
         "/devices",
+        "/login",
         "/logs",
         "/scheduler",
         "/settings"
@@ -203,6 +225,9 @@ export const routeTree = rootRoute
     },
     "/devices": {
       "filePath": "devices.tsx"
+    },
+    "/login": {
+      "filePath": "login.tsx"
     },
     "/logs": {
       "filePath": "logs.tsx"

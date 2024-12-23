@@ -1,15 +1,6 @@
 // AddRuleForm.tsx
 import React, { useState } from 'react';
-import {
-  Button,
-  Card,
-  Group,
-  Stack,
-  Checkbox,
-  Select,
-  Notification,
-  rem,
-} from '@mantine/core';
+import { Button, Card, Group, Stack, Checkbox, Select } from '@mantine/core';
 import { TimeInput } from '@mantine/dates';
 import { Schedule, AddRuleFormProps } from './types';
 import { IconX, IconCheck } from '@tabler/icons-react';
