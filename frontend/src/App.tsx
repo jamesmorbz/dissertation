@@ -1,64 +1,17 @@
-import {
-  ActionIcon,
-  Autocomplete,
-  Input,
-  MantineProvider,
-  TextInput,
-  Textarea,
-  localStorageColorSchemeManager,
-} from '@mantine/core';
-import { Notifications } from '@mantine/notifications';
-import { RouterProvider, createRouter } from '@tanstack/react-router';
-import { getDefaultStore, useAtom, useAtomValue } from 'jotai';
-import { ContextMenuProvider } from 'mantine-contextmenu';
-import { nativeBarAtom } from './state/atoms';
-
-import '@mantine/core/styles.css';
-import '@mantine/dates/styles.css';
-import '@mantine/notifications/styles.css';
-import '@mantine/tiptap/styles.css';
-
-import 'mantine-contextmenu/styles.css';
-import 'mantine-datatable/styles.css';
-
-import '@/styles/global.css';
-
-const colorSchemeManager = localStorageColorSchemeManager({
-  key: 'mantine-color-scheme',
-});
-
-import ErrorComponent from '@/components/ErrorComponent';
-import { routeTree } from './routeTree.gen';
-
-export type Dirs = {
-  documentDir: string;
-};
-
-const router = createRouter({
-  routeTree,
-  defaultErrorComponent: ErrorComponent,
-});
-
-declare module '@tanstack/react-router' {
-  interface Register {
-    router: typeof router;
-  }
-}
+import './App.css';
+import { LoginForm } from '@/pages/login';
+import { Dashboard } from '@/pages/dashboard';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 export default function App() {
-  const isNative = useAtomValue(nativeBarAtom);
-
   return (
-    <>
-      <MantineProvider
-        colorSchemeManager={colorSchemeManager}
-        defaultColorScheme="dark"
-      >
-        <ContextMenuProvider>
-          <Notifications />
-          <RouterProvider router={router} />
-        </ContextMenuProvider>
-      </MantineProvider>
-    </>
+    <Router>
+      <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+        <Routes>
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/" element={<Dashboard />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
