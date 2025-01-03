@@ -10,8 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Navbar } from '@/components/navbar/navbar';
 
-export function LoginForm() {
+export function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -34,6 +35,7 @@ export function LoginForm() {
     const formDetails = new URLSearchParams();
     formDetails.append('username', username);
     formDetails.append('password', password);
+    localStorage.setItem('token', 'Fudged');
 
     try {
       const response = await fetch('http://localhost:8000/user/login', {
@@ -49,7 +51,7 @@ export function LoginForm() {
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem('token', data.access_token);
-        navigate('/');
+        navigate('/dashboard');
       } else {
         const errorData = await response.json();
         setError(errorData.detail || 'Authentication failed!');
@@ -61,7 +63,9 @@ export function LoginForm() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 min-h-screen">
+      {/* <h1>Selene</h1> */}
+      <Navbar />
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
@@ -73,11 +77,10 @@ export function LoginForm() {
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label>Username / Email</Label>
                 <Input
                   id="email"
-                  type="email"
-                  placeholder="m@example.com"
+                  placeholder="user OR user@example.com"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 from core.database import User, Passwords
@@ -11,14 +12,18 @@ from utils.user import (
     get_user_by_email,
     authenticate_user,
     create_jwt_token,
+    verify_jwt_token,
     hash_password,
     get_current_user,
 )
 from typing import Annotated
+from fastapi import Response
+from fastapi.security import OAuth2PasswordBearer
 
 router = APIRouter()
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 120
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 class UserCreate(BaseModel):
@@ -89,6 +94,9 @@ def login_for_access_token(
     access_token = create_jwt_token(
         data={"username": user.username}, expires_delta=access_token_expires
     )
+    user.last_login = func.now()
+    db.commit()
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
@@ -103,21 +111,33 @@ def update_user_attributes(
     return current_user
 
 
+@router.get("/verify-token")
+def verify_token(token: Annotated[str, Depends(oauth2_scheme)]):
+    return verify_jwt_token(token)
+
+
 @router.put("/update")
 def update_user_attributes(
     user_update: UserUpdate,
     current_user: Annotated[User, Depends(get_current_user)],
     db: Session = Depends(sql_client_dependency),
 ):
+
     user = db.query(User).filter(User.username == current_user.username).first()
     if (
         not user
     ):  # TODO: I don't think this is needed, since we already have a user object. But since we are updating maybe we need to ensure the user still exists, in case we cache the decode (to catch the edge case of jwt token creation, deleting account then trying to update it)
         raise HTTPException(status_code=404, detail="User not found")
 
+    updated = False
     for key, value in user_update.model_dump(exclude_unset=True).items():
-        setattr(user, key, value)
+        if getattr(user, key) != value:
+            setattr(user, key, value)
+            updated = True
 
-    db.commit()
-    db.refresh(user)  # Refresh the updated user instance
-    return {"message": "User updated successfully", "user": user}
+    if updated:
+        db.commit()
+        db.refresh(user)  # Refresh the updated user instance
+        return {"message": "User updated successfully", "user": user}
+    else:
+        return Response(status_code=status.HTTP_304_NOT_MODIFIED)

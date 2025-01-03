@@ -19,6 +19,17 @@ class InfluxDBQueries:
         """
 
     @staticmethod
+    def get_last_usage_query():
+        return """
+        from(bucket: "metrics")
+            |> range(start: -30d)
+            |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
+            |> filter(fn: (r) => r["_field"] == "power")
+            |> map(fn: (r) => ({r with _unix: uint(v: r._time) }))
+            |> last()
+        """
+
+    @staticmethod
     def get_device_usage_query(
         lookback: str, device_id: str, interval: str, aggregation: str
     ):  # TODO: Stricter type hints on input to InfluxQuery

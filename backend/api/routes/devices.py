@@ -37,44 +37,13 @@ class DeviceStatus(BaseModel):
     timestamp: str
     hardware_name: str
     wifi_name: str
+    room: Optional[str]
+    tag: Optional[str]
+    friendly_name: Optional[str]
     power: bool
     uptime: int
     wifi_rssi: int
     wifi_signal: int
-
-
-@router.get(
-    "/",
-    response_model=List[DeviceDetailsResponse],
-    tags=["All Devices"],
-    summary="Get all device names",
-)
-async def devices(
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Session = Depends(sql_client_dependency),
-    influx_client: InfluxDBClient = Depends(influxdb_client_dependency),
-):
-    query: str = InfluxDBQueries.get_distinct_devices_query()
-    response: TableList = InfluxHelper.query_influx(influx_client, query)
-    fields = ["hardware_name"]
-    rows = InfluxHelper.convert_resp_to_dict(response, fields)
-
-    devices = (
-        db.query(DeviceMapping).filter(DeviceMapping.user_id == current_user.id).all()
-    )
-    devices_pk_hw_name = {device.hardware_name: device for device in devices}
-
-    for row in rows:
-        pk = row["hardware_name"]
-        device_mapping: DeviceMapping = devices_pk_hw_name.get(pk)
-        if device_mapping:
-            row["friendly_name"] = device_mapping.friendly_name
-            row["tag"] = device_mapping.tag
-        else:
-            row["friendly_name"] = None
-            row["tag"] = None
-
-    return rows
 
 
 @router.put(
@@ -110,7 +79,7 @@ async def update_device_details(
 
 
 @router.get(
-    "/current_state",
+    "/",
     response_model=List[DeviceStatus],
     tags=["All Devices"],
     summary="Get the current status of all devices",
@@ -128,6 +97,11 @@ async def devices_current_state(
     fields = ["_time", "_field", "_value", "hardware_name", "wifi_name"]
     rows = InfluxHelper.convert_resp_to_dict(response, fields)
 
+    devices = (
+        db.query(DeviceMapping).filter(DeviceMapping.user_id == current_user.id).all()
+    )
+    devices_pk_hw_name = {device.hardware_name: device for device in devices}
+
     devices = {}
     for row in rows:
         device_name = row["hardware_name"]
@@ -138,6 +112,15 @@ async def devices_current_state(
                 "wifi_name": row["wifi_name"],
                 row["_field"]: row["_value"],
             }
+            device_mapping: DeviceMapping = devices_pk_hw_name.get(device_name)
+            if device_mapping:
+                devices[device_name]["friendly_name"] = device_mapping.friendly_name
+                devices[device_name]["tag"] = device_mapping.tag
+                devices[device_name]["room"] = device_mapping.room
+            else:
+                devices[device_name]["friendly_name"] = None
+                devices[device_name]["tag"] = None
+                devices[device_name]["room"] = None
         else:
             devices[device_name][row["_field"]] = row["_value"]
 

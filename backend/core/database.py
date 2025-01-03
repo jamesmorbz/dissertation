@@ -11,10 +11,12 @@ from sqlalchemy import (
     Integer,
     String,
     TIMESTAMP,
+    inspect,
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.sql import func
+from sqlalchemy.event import listens_for
 
 influx_client = InfluxDBClient(
     url=influx_settings.url,
@@ -55,6 +57,7 @@ class User(Base):
     username = Column(String, unique=True, nullable=False, index=True)
     email = Column(String, unique=True, nullable=False, index=True)
 
+    first_name = Column(String(24))
     profile_picture = Column(Text)
     postcode = Column(Text)
     location = Column(Text)
@@ -64,9 +67,15 @@ class User(Base):
     active = Column(Boolean, nullable=False, default=True)
     last_login = Column(TIMESTAMP)
     created_at = Column(TIMESTAMP, nullable=False, default=func.now())
-    updated_at = Column(
-        TIMESTAMP, nullable=False, default=func.now(), onupdate=func.now()
-    )
+    updated_at = Column(TIMESTAMP, nullable=False, default=func.now())
+
+
+@listens_for(User, "before_update")
+def update_updated_at(mapper, connection, target):
+    state = inspect(target)
+    if state.attrs.last_login.history.has_changes():
+        return
+    target.updated_at = func.now()
 
 
 class Passwords(Base):
@@ -92,7 +101,8 @@ class DeviceMapping(Base):
 
     hardware_name = Column(String(30), nullable=False)
     friendly_name = Column(String(30), nullable=False)
-    tag = Column(Text, nullable=True)
+    room = Column(Text)
+    tag = Column(Text)
 
     created_at = Column(TIMESTAMP, nullable=False, default=func.now())
     updated_at = Column(

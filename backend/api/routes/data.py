@@ -2,11 +2,15 @@ from fastapi import APIRouter, Depends
 from datetime import datetime
 from pydantic.dataclasses import dataclass
 from typing import List
-from core.dependencies import get_influxdb_client
 from influxdb_client import InfluxDBClient
 from influxdb_client.client.flux_table import TableList
 from core.queries.influx_queries import InfluxDBQueries
 from utils.query_helper import InfluxHelper
+from utils.user import get_current_user
+from typing import Annotated
+from core.database import User
+from core.dependencies import influxdb_client_dependency
+from pydantic import BaseModel
 
 router = APIRouter()
 
@@ -40,6 +44,11 @@ class SummarySet:
     data: List[Summary]
 
 
+class LastUsage(BaseModel):
+    hardware_name: str
+    last_usage: int
+
+
 # TODO ensure these are the supported units of time supported  duration_lit = int_lit duration_unit .
 # duration_unit       = "s" | "m" | "h" | "d" | "w" .
 # TODO can play around with time truncation if we ever need
@@ -60,7 +69,7 @@ async def get_device_data(
     lookback: str = "15m",
     interval: str = "1m",
     aggregation: str = "max",
-    influx_client: InfluxDBClient = Depends(get_influxdb_client),
+    influx_client: InfluxDBClient = Depends(influxdb_client_dependency),
 ):
 
     query = InfluxDBQueries.get_device_usage_query(
@@ -83,7 +92,7 @@ async def get_device_data(
 async def get_device_daily_data(
     device_id: str,
     lookback_days: int = 7,
-    influx_client: InfluxDBClient = Depends(get_influxdb_client),
+    influx_client: InfluxDBClient = Depends(influxdb_client_dependency),
 ):
     query = InfluxDBQueries.get_daily_aggregated_data_query(lookback_days, device_id)
     response: TableList = InfluxHelper.query_influx(influx_client, query)
@@ -94,6 +103,31 @@ async def get_device_daily_data(
 
 
 @router.get(
+    "/last_usage",
+    # response_model=List[LastUsage],
+    tags=["All Devices"],
+    summary="Get the current status of all devices",
+)
+async def devices_current_state(
+    current_user: Annotated[
+        User, Depends(get_current_user)
+    ],  # TODO: add user validation to influxDB data get
+    influx_client: InfluxDBClient = Depends(influxdb_client_dependency),
+):
+    query: str = InfluxDBQueries.get_last_usage_query()
+    response: TableList = InfluxHelper.query_influx(influx_client, query)
+    fields = ["_value", "hardware_name"]
+    rows = InfluxHelper.convert_resp_to_dict(response, fields)
+
+    devices = {}
+    for row in rows:
+        device_name = row["hardware_name"]
+        devices[device_name] = {"last_usage": row["_value"]}
+
+    return devices
+
+
+@router.get(
     "/daily_data",
     response_model=List[Dataset],
     tags=["Summary", "Device"],
@@ -101,7 +135,7 @@ async def get_device_daily_data(
 )
 async def get_daily_data(
     lookback_days: int = 7,
-    influx_client: InfluxDBClient = Depends(get_influxdb_client),
+    influx_client: InfluxDBClient = Depends(influxdb_client_dependency),
 ):
     query = InfluxDBQueries.get_daily_aggregated_data_query(lookback_days)
     response: TableList = InfluxHelper.query_influx(influx_client, query)

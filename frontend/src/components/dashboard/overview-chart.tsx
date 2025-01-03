@@ -12,76 +12,37 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
 } from '@/components/ui/chart';
-
-type DataPoint = {
-  date: string;
-  [key: string]: number | string;
-};
+import { BarDataPoint } from '@/types/data-point';
 
 interface OverviewChartProps {
-  overviewChartData: Array<DataPoint>;
-  overviewChartTags: Array<string>;
+  overviewChartData: Array<BarDataPoint>;
 }
 
-const OverviewChart: React.FC<OverviewChartProps> = ({
-  overviewChartData,
-  overviewChartTags,
-}) => {
-  const chartConfig = {
-    views: {
-      label: 'Page Views',
-    },
-  } as Record<string, { label: string; color?: string }>;
-
-  overviewChartTags.forEach((tag, index) => {
-    chartConfig[tag] = {
-      label: overviewChartTags[index],
-      color: `hsl(var(--chart-${index}))`,
-    };
-  });
-
-  const [activeChart, setActiveChart] = React.useState<string>(
-    overviewChartTags[0],
+const OverviewChart: React.FC<OverviewChartProps> = ({ overviewChartData }) => {
+  const rooms = Object.keys(overviewChartData[0]).filter(
+    (key) => key !== 'date',
   );
 
-  const total = React.useMemo(() => {
-    const result: Record<string, number> = {};
-    overviewChartTags.forEach((tag) => {
-      result[tag] = overviewChartData.reduce(
-        (acc, curr) =>
-          acc + (typeof curr[tag] === 'number' ? (curr[tag] as number) : 0),
-        0,
-      );
-    });
-    return result;
-  }, [overviewChartData, overviewChartTags]);
+  const chartConfig = rooms.reduce(
+    (config, room, index) => {
+      config[room] = {
+        label: room,
+        color: `hsl(var(--chart-${index}))`,
+      };
+      return config;
+    },
+    {} as Record<string, { label: string; color: string }>,
+  );
 
   return (
     <Card className="xl:col-span-2">
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
-          <CardTitle>Plug Tag Trends</CardTitle>
-          <CardDescription>
-            Showing Total Usage of Tags for the last 30 days
-          </CardDescription>
-        </div>
-        <div className="flex">
-          {overviewChartTags.map((chart) => (
-            <button
-              key={chart}
-              data-active={activeChart === chart}
-              className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
-              onClick={() => setActiveChart(chart)}
-            >
-              <span className="text-xs text-muted-foreground">
-                {chartConfig[chart].label}
-              </span>
-              <span className="text-lg font-bold leading-none sm:text-3xl">
-                {total[chart].toLocaleString()}
-              </span>
-            </button>
-          ))}
+          <CardTitle>Usage Overview</CardTitle>
+          <CardDescription>Showing Usage for the last 30 days</CardDescription>
         </div>
       </CardHeader>
       <CardContent className="px-2 sm:p-6">
@@ -97,7 +58,7 @@ const OverviewChart: React.FC<OverviewChartProps> = ({
               right: 12,
             }}
           >
-            <CartesianGrid vertical={false} />
+            <CartesianGrid />
             <XAxis
               dataKey="date"
               tickLine={false}
@@ -127,7 +88,15 @@ const OverviewChart: React.FC<OverviewChartProps> = ({
                 />
               }
             />
-            <Bar dataKey={activeChart} fill={`var(--color-${activeChart})`} />
+            <ChartLegend content={<ChartLegendContent />} />
+            {rooms.map((room, index) => (
+              <Bar
+                key={room}
+                dataKey={room}
+                stackId="a"
+                fill={`hsl(var(--chart-${index}))`}
+              />
+            ))}
           </BarChart>
         </ChartContainer>
       </CardContent>

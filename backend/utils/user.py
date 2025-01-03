@@ -9,7 +9,7 @@ from fastapi.security import OAuth2PasswordBearer
 from typing import Annotated
 from sqlalchemy import or_
 
-SECRET_KEY = "your_secret_key"
+SECRET_KEY = "your_secret_ke"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 7200  # TODO - Future James, Please turn this down.
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -55,7 +55,7 @@ def get_current_user(
         )
 
 
-def verify_jwt_token(token: str):
+def verify_jwt_token(token: Annotated[str, Depends(oauth2_scheme)]):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("username")

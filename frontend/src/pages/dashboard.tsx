@@ -1,33 +1,16 @@
-import { Link } from 'react-router-dom';
-import { CircleUser, Menu, HousePlug } from 'lucide-react';
-
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { OverviewChart } from '@/components/dashboard/overview-chart';
 import { DeviceCard } from '@/components/dashboard/device-card';
 import { CurrentUsageCard } from '@/components/dashboard/current-usage-card';
 import { WeeklyUsageCard } from '@/components/dashboard/weekly-usage-card';
 import { CarbonIntensityCard } from '@/components/dashboard/carbon-intensity-card';
 import { EnergyTariffCard } from '@/components/dashboard/energy-tariff-card';
-
-export const description =
-  'An application shell with a header and main content area. The header has a navbar, a search input and and a user nav dropdown. The user nav is toggled by a button with an avatar image. The main content area is divided into two rows. The first row has a grid of cards with statistics. The second row has a grid of cards with a table of recent transactions and a list of recent sales.';
-
-export const iframeHeight = '730px';
-
-export const containerClassName = 'w-full h-full';
+import { Navbar } from '@/components/navbar/navbar';
+import { Device } from '@/types/device';
+import apiClient from '@/lib/api-client';
+import { useState, useEffect } from 'react';
+import { LastUsage } from '@/types/data-point';
 
 export function Dashboard() {
-  const overviewChartTags = ['bedroom', 'kitchen'];
   const overviewChartData = [
     { date: '2024-12-01', bedroom: 222, kitchen: 150 },
     { date: '2024-12-02', bedroom: 97, kitchen: 180 },
@@ -46,7 +29,7 @@ export function Dashboard() {
     { date: '2024-12-15', bedroom: 120, kitchen: 170 },
     { date: '2024-12-16', bedroom: 138, kitchen: 190 },
     { date: '2024-12-17', bedroom: 446, kitchen: 360 },
-    { date: '2024-12-18', bedroom: 364, kitchen: 1000 },
+    { date: '2024-12-18', bedroom: 364, kitchen: 200 },
     { date: '2024-12-19', bedroom: 243, kitchen: 180 },
     { date: '2024-12-20', bedroom: 89, kitchen: 150 },
     { date: '2024-12-21', bedroom: 137, kitchen: 200 },
@@ -61,7 +44,9 @@ export function Dashboard() {
     { date: '2024-12-30', bedroom: 454, kitchen: 380 },
   ];
 
-  const currentUsage: number = 243;
+  const firstName: string = 'James';
+
+  const last_usage: number = 243;
 
   const weeklyUsage: number = 1255;
   const weeklyUsageTrend: number = +5;
@@ -72,119 +57,48 @@ export function Dashboard() {
   const energyTariff = 23;
   const energyTariffTrend = +50;
 
-  const devices = [
-    {
-      hardware_name: 'tasmota_XXX000',
-      friendly_name: 'BedroomPlug1',
-      tag: 'Bedroom,Computer',
-      status: 'ONLINE',
-      current_usage: '5W',
-    },
-    {
-      hardware_name: 'tasmota_XXX001',
-      friendly_name: 'BedroomPlug2',
-      tag: 'Bedroom,Hairdryer',
-      status: 'OFFLINE',
-      current_usage: '10W',
-    },
-    {
-      hardware_name: 'tasmota_XXX003',
-      friendly_name: null,
-      tag: 'Bedroom,Charger',
-      status: 'ONLINE',
-      current_usage: '15W',
-    },
-  ];
+  const [devices, setDevices] = useState<Device[]>([]);
 
-  const links = [
-    { to: '/', label: 'Dashboard' },
-    { to: '/devices', label: 'Devices' },
-    { to: '/analytics', label: 'Analytics' },
-    { to: '/automation', label: 'Automation' },
-    { to: '/logs', label: 'Logs' },
-    { to: '/faqs', label: 'FAQs' },
-  ];
+  useEffect(() => {
+    const fetchDevices = async () => {
+      let deviceResponse: Device[] = [];
+
+      try {
+        deviceResponse = (await apiClient.get('/devices/')).data;
+      } catch (error) {
+        console.error('Failed to fetch devices:', error);
+        return;
+      }
+
+      try {
+        const usageResponse: LastUsage = (
+          await apiClient.get('/data/last_usage')
+        ).data;
+        deviceResponse.forEach((device) => {
+          const hardwareName = device.hardware_name;
+          if (usageResponse[hardwareName]) {
+            device.last_usage = usageResponse[hardwareName].last_usage;
+          }
+        });
+      } catch (error) {
+        console.error('Failed to fetch usage:', error);
+      }
+
+      setDevices(deviceResponse);
+    };
+
+    fetchDevices();
+    const interval = setInterval(fetchDevices, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="flex min-h-screen w-full flex-col">
-      <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-        {/* Desktop Navigation */}
-        <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-          <Link
-            to="#"
-            className="flex items-center gap-2 text-lg font-semibold md:text-base"
-          >
-            <HousePlug className="h-6 w-6" />
-          </Link>
-          {links.map((link) => (
-            <Link
-              key={link.label}
-              to={link.to}
-              className="text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-
-        {/* Mobile Navigation */}
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="shrink-0 md:hidden"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left">
-            <nav className="grid gap-6 text-lg font-medium">
-              <Link
-                to="#"
-                className="flex items-center gap-2 text-lg font-semibold"
-              >
-                <HousePlug className="h-6 w-6" />
-              </Link>
-              {links.map((link) => (
-                <Link
-                  key={link.label}
-                  to={link.to}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-          </SheetContent>
-        </Sheet>
-        <div className="flex items-center gap-4 ml-auto">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="icon" className="rounded-full">
-                <CircleUser className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Link
-                  to="/settings"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Settings
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>Support</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </header>
+      <Navbar />
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+        {/* <h2>Hi {firstName}!</h2> */}
         <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-          <CurrentUsageCard currentUsage={currentUsage} />
+          <CurrentUsageCard last_usage={last_usage} />
           <WeeklyUsageCard
             weeklyUsage={weeklyUsage}
             weeklyUsageTrend={weeklyUsageTrend}
@@ -200,10 +114,7 @@ export function Dashboard() {
         </div>
 
         <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
-          <OverviewChart
-            overviewChartData={overviewChartData}
-            overviewChartTags={overviewChartTags}
-          />
+          <OverviewChart overviewChartData={overviewChartData} />
           <DeviceCard devices={devices} />
         </div>
       </main>
