@@ -14,6 +14,32 @@ export type LastUsage = {
   };
 };
 
+export type WeeklyTotal = {
+  total: number;
+  start: string;
+  stop: string;
+};
+
+type IntensityPayload = {
+  forecast: number;
+  actual: number;
+  index: carbonIntensityIndex;
+};
+export type CarbonIntensity = {
+  from: string;
+  to: string;
+  intensity: IntensityPayload;
+};
+
+export const carbonIntensityIndex = [
+  'very low',
+  'low',
+  'moderate',
+  'high',
+  'very high',
+] as const;
+export type carbonIntensityIndex = (typeof carbonIntensityIndex)[number];
+
 export const timeRanges = [
   '1H',
   '3H',

@@ -45,6 +45,44 @@ class InfluxDBQueries:
         """
 
     @staticmethod
+    def get_weekly_summary_query():
+        return """
+            union(
+                tables: [
+                    from(bucket: "metrics")
+                        |> range(start: -14d, stop: -7d)
+                        |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
+                        |> filter(fn: (r) => r["_field"] == "power")
+                        |> group()
+                        |> sum(),
+                    from(bucket: "metrics")
+                        |> range(start: -7d, stop: now())
+                        |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
+                        |> filter(fn: (r) => r["_field"] == "power")
+                        |> group()
+                        |> sum(),
+                ]
+            )
+        """
+
+    @staticmethod
+    def get_monthly_summary_query():
+        return """
+            from(bucket: "metrics")
+            |> range(start: -30d)
+            |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
+            |> filter(fn: (r) => r["_field"] == "power")
+            |> aggregateWindow(every: 1d, fn: sum, createEmpty: true)
+            |> fill(value:0.0)
+            |> map(fn: (r) => ({r with _time: 
+                if int(v: r._stop) - int(v: r._time) < 100000 then
+                    r._time
+                else
+                    time(v: int(v: r._time) - 86400000000000)
+            }))
+        """
+
+    @staticmethod
     def get_daily_aggregated_data_query(lookback_days: int, device_id: str = None):
         if device_id is None:
             return f"""

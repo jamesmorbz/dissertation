@@ -8,9 +8,10 @@ from core.queries.influx_queries import InfluxDBQueries
 from utils.query_helper import InfluxHelper
 from utils.user import get_current_user
 from typing import Annotated
-from core.database import User
-from core.dependencies import influxdb_client_dependency
+from core.models import User, DeviceMapping
+from core.dependencies import influxdb_client_dependency, sql_client_dependency
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -47,6 +48,12 @@ class SummarySet:
 class LastUsage(BaseModel):
     hardware_name: str
     last_usage: int
+
+
+class WeeklySummary(BaseModel):
+    total: int
+    start: str
+    stop: str
 
 
 # TODO ensure these are the supported units of time supported  duration_lit = int_lit duration_unit .
@@ -128,6 +135,68 @@ async def devices_current_state(
 
 
 @router.get(
+    "/weekly-total",
+    response_model=List[WeeklySummary],
+    tags=["All Devices", "Summary"],
+    summary="Last 14 Days in Weekly Total Chunks",
+)
+async def get_weekly_total(
+    influx_client: InfluxDBClient = Depends(influxdb_client_dependency),
+):
+    query = InfluxDBQueries.get_weekly_summary_query()
+    response: TableList = InfluxHelper.query_influx(influx_client, query)
+    fields = ["_value", "_start", "_stop"]
+    rows = InfluxHelper.convert_resp_to_dict(response, fields)
+
+    results = []
+    for row in rows:
+        result = {
+            "total": row["_value"],
+            "start": datetime.fromisoformat(row["_start"]).strftime("%d %b"),
+            "stop": datetime.fromisoformat(row["_stop"]).strftime("%d %b"),
+        }
+        results.append(result)
+
+    return results
+
+
+@router.get("/monthly-summary", tags=["All Devices", "Summary"])
+async def get_monthly_summary(
+    current_user: Annotated[
+        User, Depends(get_current_user)
+    ],  # TODO: add user validation to influxDB data get
+    influx_client: InfluxDBClient = Depends(influxdb_client_dependency),
+    db: Session = Depends(sql_client_dependency),
+):
+
+    query = InfluxDBQueries.get_monthly_summary_query()
+    response: TableList = InfluxHelper.query_influx(influx_client, query)
+    fields = ["_time", "hardware_name", "_value"]
+    rows = InfluxHelper.convert_resp_to_dict(response, fields)
+
+    devices = (
+        db.query(DeviceMapping.hardware_name, DeviceMapping.room)
+        .filter(DeviceMapping.user_id == current_user.id)
+        .all()
+    )
+    devices_pk_hw_name = {device.hardware_name: device.room for device in devices}
+
+    results = {}
+    for row in rows:
+        date = row["_time"].split("T")[0]
+        hardware_name = row["hardware_name"]
+        value = row["_value"]
+        room = devices_pk_hw_name.get(hardware_name, "Unknown")
+
+        if date not in results:
+            results[date] = {"date": date, room: value}
+        else:
+            results[date][room] = results[date].get(room, 0.0) + value
+
+    return list(results.values())
+
+
+@router.get(
     "/daily_data",
     response_model=List[Dataset],
     tags=["Summary", "Device"],
@@ -151,4 +220,4 @@ async def get_daily_data(
         else:
             data[device_name]["data"].append(data_point)
 
-    return data.values()
+    return list(data.values())

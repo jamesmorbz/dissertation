@@ -1,5 +1,13 @@
 from fastapi import APIRouter
-from api.routes import monitoring, data, devices, controller, forecasting, user
+from api.routes import (
+    monitoring,
+    data,
+    devices,
+    controller,
+    forecasting,
+    user,
+    external,
+)
 
 api_router = APIRouter()
 # When you create a new router add config to the tags_metadata.yaml
@@ -9,3 +17,4 @@ api_router.include_router(controller.router, prefix="/controller", tags=["Contro
 api_router.include_router(data.router, prefix="/data", tags=["Data"])
 api_router.include_router(forecasting.router, prefix="/forecast", tags=["Forecast"])
 api_router.include_router(user.router, prefix="/user", tags=["User"])
+api_router.include_router(external.router, prefix="/external", tags=["External"])

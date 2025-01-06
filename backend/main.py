@@ -4,6 +4,8 @@ from fastapi.openapi.utils import get_openapi
 from api.main import api_router
 import uvicorn
 from core.config import fastapi_settings, tags_metadata
+from core.database import db_manager
+from core.models import User, Passwords, DeviceMapping
 
 app = FastAPI()
 
@@ -33,9 +35,7 @@ def custom_openapi():
     openapi_schema["security"] = [{"bearerAuth": []}]
     for path, methods in openapi_schema["paths"].items():
         for method in methods.values():
-            method["security"] = [
-                {"bearerAuth": []}
-            ]  # Attach BearerAuth to /devices paths
+            method["security"] = [{"bearerAuth": []}]
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
@@ -58,6 +58,11 @@ app.add_middleware(
 )
 
 app.include_router(api_router)  # prefix=settings.API_V1_STR
+
+User.metadata.create_all(bind=db_manager.engine)
+Passwords.metadata.create_all(bind=db_manager.engine)
+DeviceMapping.metadata.create_all(bind=db_manager.engine)
+
 
 if __name__ == "__main__":
     uvicorn.run(

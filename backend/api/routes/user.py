@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
-from core.database import User, Passwords
+from core.models import User, Passwords
 from pydantic import BaseModel, EmailStr, Field
 from core.dependencies import sql_client_dependency
 from typing import Optional

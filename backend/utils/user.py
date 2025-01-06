@@ -1,4 +1,4 @@
-from core.database import User, Passwords
+from core.models import User, Passwords
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from fastapi import HTTPException, Depends, status

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
 import {
   Card,
@@ -22,9 +22,9 @@ interface OverviewChartProps {
 }
 
 const OverviewChart: React.FC<OverviewChartProps> = ({ overviewChartData }) => {
-  const rooms = Object.keys(overviewChartData[0]).filter(
-    (key) => key !== 'date',
-  );
+  const rooms: string[] = Array.from(
+    new Set(overviewChartData.flatMap((row) => Object.keys(row))),
+  ).filter((key) => key !== 'date');
 
   const chartConfig = rooms.reduce(
     (config, room, index) => {
@@ -61,25 +61,34 @@ const OverviewChart: React.FC<OverviewChartProps> = ({ overviewChartData }) => {
             <CartesianGrid />
             <XAxis
               dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
               minTickGap={32}
               tickFormatter={(value) => {
                 const date = new Date(value);
-                return date.toLocaleDateString('en-US', {
-                  month: 'short',
+                return date.toLocaleDateString('en-UK', {
                   day: 'numeric',
+                  month: 'short',
                 });
               }}
             />
+            <YAxis
+              tickFormatter={() => {
+                return '';
+              }}
+              tickMargin={8}
+              label={{
+                value: 'Power (kW)',
+                position: 'center',
+                angle: -90,
+              }}
+            />
+
             <ChartTooltip
               content={
                 <ChartTooltipContent
                   className="w-[150px]"
                   nameKey="usage"
                   labelFormatter={(value) =>
-                    new Date(value).toLocaleDateString('en-US', {
+                    new Date(value).toLocaleDateString('en-UK', {
                       month: 'short',
                       day: 'numeric',
                       year: 'numeric',

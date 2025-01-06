@@ -7,7 +7,7 @@ from influxdb_client.client.flux_table import TableList
 from core.queries.influx_queries import InfluxDBQueries
 from utils.query_helper import InfluxHelper
 from utils.user import get_current_user
-from core.database import User, DeviceMapping
+from core.models import User, DeviceMapping
 from typing import Optional
 from sqlalchemy.orm import Session
 
@@ -15,11 +15,11 @@ router = APIRouter()
 
 
 class DeviceUpdate(BaseModel):
-    hardware_name: str
     friendly_name: Optional[str] = Field(
         None, max_length=30, description="User Friendly Plug 'Nickname'"
     )
     tag: Optional[str] = Field(None, description="")
+    room: Optional[str] = Field(None, description="")
 
 
 class DeviceDetailsResponse(BaseModel):
@@ -47,12 +47,13 @@ class DeviceStatus(BaseModel):
 
 
 @router.put(
-    "/",
+    "/{hardware_name}",
     # response_model=DeviceDetailsResponse,
     tags=["Device"],
     summary="Update device metadata (friendly name, tag)",
 )
 async def update_device_details(
+    hardware_name: str,
     device_update: DeviceUpdate,
     current_user: Annotated[User, Depends(get_current_user)],
     db: Session = Depends(sql_client_dependency),
@@ -61,12 +62,12 @@ async def update_device_details(
         db.query(DeviceMapping)
         .filter(
             DeviceMapping.user_id == current_user.id,
-            DeviceMapping.hardware_name == device_update.hardware_name,
+            DeviceMapping.hardware_name == hardware_name,
         )
         .first()
     )
     if not device:
-        device = DeviceMapping(user_id=current_user.id)
+        device = DeviceMapping(user_id=current_user.id, hardware_name=hardware_name)
         db.add(device)
 
     for key, value in device_update.model_dump(exclude_unset=True).items():
@@ -128,7 +129,7 @@ async def devices_current_state(
 
 
 @router.get(
-    "/{hardware_name}/device_mapping",
+    "/{hardware_name}",
     tags=["Device"],
     summary="Get the DeviceMapping a given device",
 )

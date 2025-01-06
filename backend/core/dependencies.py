@@ -1,11 +1,13 @@
 from influxdb_client import InfluxDBClient
-from sqlite3 import Connection
-from .database import get_influxdb_client, get_sql_session
+from core.database import db_manager
+from typing import Generator
+from sqlalchemy.orm import Session
 
 
 def influxdb_client_dependency() -> InfluxDBClient:
-    return get_influxdb_client()
+    return db_manager.get_influxdb_client()
 
 
-def sql_client_dependency() -> Connection:
-    return get_sql_session()
+def sql_client_dependency() -> Generator[Session, None, None]:
+    with db_manager.session() as session:
+        yield session
