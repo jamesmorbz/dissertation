@@ -1,14 +1,14 @@
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card } from '@/components/ui/card';
+import { Loader2 } from 'lucide-react';
 
 const SkeletonCard = () => {
   return (
-    <div className="flex flex-col space-y-3">
-      <Skeleton className="h-[125px] w-[250px] rounded-xl" />
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-[250px]" />
-        <Skeleton className="h-4 w-[200px]" />
+    <Card className="flex items-center justify-center p-6">
+      <div className="flex flex-col items-center space-y-2">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <span className="text-sm text-muted-foreground">Loading...</span>
       </div>
-    </div>
+    </Card>
   );
 };
 

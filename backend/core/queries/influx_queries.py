@@ -30,6 +30,18 @@ class InfluxDBQueries:
         """
 
     @staticmethod
+    def get_row_count_per_device_query():
+        return """
+        from(bucket: "metrics")
+            |> range(start: -24h)
+            |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
+            |> filter(fn: (r) => r["_field"] == "power")
+            |> window(every: 1h)
+            |> group(columns: ["hardware_name", "_start"])
+            |> count()
+        """
+
+    @staticmethod
     def get_device_usage_query(
         lookback: str, device_id: str, interval: str, aggregation: str
     ):  # TODO: Stricter type hints on input to InfluxQuery

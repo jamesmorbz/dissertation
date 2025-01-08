@@ -6,6 +6,8 @@ import uvicorn
 from core.config import fastapi_settings, tags_metadata
 from core.database import db_manager
 from core.models import User, Passwords, DeviceMapping
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends import inmemory
 
 app = FastAPI()
 
@@ -39,6 +41,8 @@ def custom_openapi():
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
+
+FastAPICache.init(inmemory.InMemoryBackend())
 
 app.openapi = custom_openapi
 

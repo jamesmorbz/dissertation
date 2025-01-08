@@ -10,6 +10,8 @@ from utils.user import get_current_user
 from core.models import User, DeviceMapping
 from typing import Optional
 from sqlalchemy.orm import Session
+from fastapi_cache.decorator import cache
+from utils.cache import cache_entry_user_pk
 
 router = APIRouter()
 
@@ -85,7 +87,7 @@ async def update_device_details(
     tags=["All Devices"],
     summary="Get the current status of all devices",
 )
-# @cache(expire=5) # TODO a bit aggresive??
+@cache(expire=60, key_builder=cache_entry_user_pk)  # TODO a bit aggresive??
 async def devices_current_state(
     current_user: Annotated[
         User, Depends(get_current_user)
@@ -125,11 +127,11 @@ async def devices_current_state(
         else:
             devices[device_name][row["_field"]] = row["_value"]
 
-    return devices.values()
+    return list(devices.values())
 
 
 @router.get(
-    "/{hardware_name}",
+    "/get/{hardware_name}",
     tags=["Device"],
     summary="Get the DeviceMapping a given device",
 )
@@ -152,6 +154,54 @@ async def devices_current_state(
         )
 
     return device
+
+
+@router.get(
+    "/device_reliability", tags=["All Devices"], summary="Reliability of Devices"
+)
+async def device_reliability(
+    current_user: Annotated[
+        User, Depends(get_current_user)
+    ],  # TODO: add user validation to influxDB data get
+    influx_client: InfluxDBClient = Depends(influxdb_client_dependency),
+):
+    query = InfluxDBQueries.get_row_count_per_device_query()
+    response: TableList = InfluxHelper.query_influx(influx_client, query)
+    fields = ["_value", "hardware_name", "_start"]
+    rows = InfluxHelper.convert_resp_to_dict(response, fields)
+
+    results = {}
+
+    for row in rows:
+        hardware_name = row["hardware_name"]
+        if (
+            "." in row["_start"]
+        ):  # Happens if timestamp isn't flush on the hour. (If it's not a whole hour window)
+            continue
+        if hardware_name not in results:
+            results[hardware_name] = {
+                "reliabilities": [],
+                "avg": 0,
+                "best": 0,
+                "worst": 100,
+            }
+
+        reliability = round((row["_value"] / 720) * 100, 2)
+
+        results[hardware_name]["reliabilities"].append(reliability)
+        results[hardware_name]["avg"] += reliability
+
+    for hardware_name in results:
+        results[hardware_name]["avg"] = round(
+            results[hardware_name]["avg"]
+            / len(results[hardware_name]["reliabilities"]),
+            2,
+        )
+        results[hardware_name]["best"] = max(results[hardware_name]["reliabilities"])
+        results[hardware_name]["worst"] = min(results[hardware_name]["reliabilities"])
+        results[hardware_name].pop("reliabilities")
+
+    return results
 
 
 @router.get(

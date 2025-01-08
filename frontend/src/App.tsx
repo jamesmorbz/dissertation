@@ -26,9 +26,9 @@ export default function App() {
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<SplashScreen />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/sign-up" element={<Login />} />
               <Route path="/faqs" element={<FAQs />} />
+              <Route path="/sign-up" element={<Login />} />
+              <Route path="/login" element={<Login />} />
 
               {/* Protected Routes */}
               <Route element={<ProtectedRoute />}>

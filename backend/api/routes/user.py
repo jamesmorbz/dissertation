@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
-from core.models import User, Passwords
+from core.models import User, Passwords, Notification, Audit
 from pydantic import BaseModel, EmailStr, Field
 from core.dependencies import sql_client_dependency
 from typing import Optional
@@ -45,6 +45,12 @@ class UserUpdate(BaseModel):
     subscription: Optional[str] = Field(
         None, description="The user's subscription plan"
     )
+
+
+class NotificationResponse(BaseModel):
+    timestamp: str
+    message: str
+    read: bool
 
 
 def create_user(db: Session, user: UserCreate):
@@ -95,6 +101,8 @@ def login_for_access_token(
         data={"username": user.username}, expires_delta=access_token_expires
     )
     user.last_login = func.now()
+    notifications = Notification(user_id=user.id, message=f"Welcome Back!")
+    db.add(notifications)
     db.commit()
 
     return {
@@ -141,3 +149,43 @@ def update_user_attributes(
         return {"message": "User updated successfully", "user": user}
     else:
         return Response(status_code=status.HTTP_304_NOT_MODIFIED)
+
+
+@router.get("/notifications")
+def get_notifications(
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Session = Depends(sql_client_dependency),
+):
+    return (
+        db.query(Notification)
+        .filter(Notification.user_id == current_user.id)
+        .order_by(Notification.timestamp.desc())
+        .limit(10)
+        .all()
+    )
+
+
+@router.post("/notifications/mark-all-read")
+def mark_notifications_read(
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Session = Depends(sql_client_dependency),
+):
+    db.query(Notification).filter(
+        Notification.user_id == current_user.id, Notification.read == False
+    ).update({Notification.read: True})
+
+    db.commit()
+    return {"status": "success"}
+
+
+@router.get("/audit")
+def get_notifications(
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Session = Depends(sql_client_dependency),
+):
+    return (
+        db.query(Audit)
+        .filter(Audit.user_id == current_user.id)
+        .order_by(Audit.timestamp.desc())
+        .all()
+    )

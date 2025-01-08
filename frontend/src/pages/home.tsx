@@ -19,7 +19,7 @@ export function SplashScreen() {
             ease.
           </p>
           <div className="space-x-4">
-            <Link to="/login">
+            <Link to="/dashboard">
               <Button className="px-6">Get Started</Button>
             </Link>
           </div>

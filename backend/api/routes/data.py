@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from datetime import datetime
 from pydantic.dataclasses import dataclass
 from typing import List
@@ -12,6 +12,8 @@ from core.models import User, DeviceMapping
 from core.dependencies import influxdb_client_dependency, sql_client_dependency
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from fastapi_cache.decorator import cache
+from utils.cache import cache_entry_user_pk
 
 router = APIRouter()
 
@@ -115,7 +117,8 @@ async def get_device_daily_data(
     tags=["All Devices"],
     summary="Get the current status of all devices",
 )
-async def devices_current_state(
+@cache(expire=60, key_builder=cache_entry_user_pk)
+async def last_usage(
     current_user: Annotated[
         User, Depends(get_current_user)
     ],  # TODO: add user validation to influxDB data get
@@ -157,6 +160,9 @@ async def get_weekly_total(
         }
         results.append(result)
 
+    if len(results) != 2:
+        raise HTTPException(status_code=412, detail=f"No Weekly Comparison Data Found")
+
     return results
 
 
@@ -185,7 +191,7 @@ async def get_monthly_summary(
     for row in rows:
         date = row["_time"].split("T")[0]
         hardware_name = row["hardware_name"]
-        value = row["_value"]
+        value = row["_value"] / 1000 * (1 / 360)  # TODO
         room = devices_pk_hw_name.get(hardware_name, "Unknown")
 
         if date not in results:

@@ -1,73 +1,55 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from 'lucide-react';
 import { Navbar } from '@/components/navbar/navbar';
+import { AuditLog } from '@/types/logs';
+import { AuditTable } from '@/components/audit/table';
+import { Pagination } from '@/components/audit/pagination';
+import apiClient from '@/lib/api-client';
 
-const generateLogs = (count: number) => {
-  return Array.from({ length: count }, (_, i) => ({
-    id: i + 1,
-    action: i % 2 === 0 ? 'System Update' : 'Configuration Change',
-    description:
-      i % 2 === 0
-        ? `Updated firmware version to ${2 + i / 1000}`
-        : 'Modified network settings',
-    type: i % 3 === 0 ? 'automated' : 'manual',
-    device: `Device ${String.fromCharCode(65 + (i % 26))}`,
-    timestamp: new Date(2024, 0, 2, 10, 30 + i).toISOString(),
-  }));
-};
-
-const LOGS_DATA = generateLogs(1235);
 const PAGE_SIZE = 15;
 
-export function Audit() {
+export const Audit: React.FC = () => {
+  const [logs, setLogs] = useState<AuditLog[]>([]);
   const [selectedDevice, setSelectedDevice] = useState('all');
-  const [selectedType, setSelectedType] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLogs = async () => {
+      try {
+        setIsLoading(true);
+        const data = (await apiClient.get('/user/audit')).data;
+        setLogs(data);
+      } catch (error) {
+        console.error('Error fetching audit logs:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLogs();
+  }, []);
 
   const devices = useMemo(
-    () => [...new Set(LOGS_DATA.map((log) => log.device))],
-    [],
-  );
-
-  const types = useMemo(
-    () => [...new Set(LOGS_DATA.map((log) => log.type))],
-    [],
+    () => [...new Set(logs.map((log) => log.device))],
+    [logs],
   );
 
   const filteredLogs = useMemo(() => {
-    let filtered = LOGS_DATA;
+    let filtered = logs;
 
     if (selectedDevice !== 'all') {
       filtered = filtered.filter((log) => log.device === selectedDevice);
     }
 
-    if (selectedType !== 'all') {
-      filtered = filtered.filter((log) => log.type === selectedType);
-    }
-
     return filtered;
-  }, [selectedDevice, selectedType]);
+  }, [logs, selectedDevice]);
 
   const { totalItems, totalPages, startIndex, endIndex, currentItems } =
     useMemo(() => {
@@ -88,7 +70,7 @@ export function Audit() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedDevice, selectedType]);
+  }, [selectedDevice]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
@@ -97,6 +79,17 @@ export function Audit() {
   const goToPage = (page: number) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen w-full flex-col">
+        <Navbar />
+        <div className="container mx-auto py-6">
+          <div className="flex items-center justify-center">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -118,103 +111,20 @@ export function Audit() {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={selectedType} onValueChange={setSelectedType}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="All Types" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="automated">Automated</SelectItem>
-                <SelectItem value="manual">Manual</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </div>
 
-        <Table className="border border-gray-200">
-          <TableHeader>
-            <TableRow className="border-b border-gray-200">
-              <TableHead className="border-r border-gray-200">Action</TableHead>
-              <TableHead className="border-r border-gray-200">
-                Description
-              </TableHead>
-              <TableHead className="border-r border-gray-200">Type</TableHead>
-              <TableHead className="border-r border-gray-200">Device</TableHead>
-              <TableHead>Timestamp</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {currentItems.map((log) => (
-              <TableRow key={log.id} className="border-b border-gray-200">
-                <TableCell className="border-r border-gray-200 text-left">
-                  {log.action}
-                </TableCell>
-                <TableCell className="border-r border-gray-200 text-left">
-                  {log.description}
-                </TableCell>
-                <TableCell className="border-r border-gray-200">
-                  <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      log.type === 'automated'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-green-100 text-green-800'
-                    }`}
-                  >
-                    {log.type}
-                  </span>
-                </TableCell>
-                <TableCell className="border-r border-gray-200">
-                  {log.device}
-                </TableCell>
-                <TableCell>{formatDate(log.timestamp)}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <AuditTable logs={currentItems} formatDate={formatDate} />
 
-        <div className="mt-4 flex items-center justify-between px-2">
-          <div className="text-sm text-gray-700">
-            Showing {startIndex + 1} to {endIndex} of {totalItems} results
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => goToPage(1)}
-              disabled={currentPage === 1}
-            >
-              <ChevronsLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => goToPage(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="mx-4">
-              Page {currentPage} of {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => goToPage(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => goToPage(totalPages)}
-              disabled={currentPage === totalPages}
-            >
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          startIndex={startIndex}
+          endIndex={endIndex}
+          totalItems={totalItems}
+          goToPage={goToPage}
+        />
       </div>
     </div>
   );
-}
+};

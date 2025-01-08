@@ -13,7 +13,7 @@ import {
 
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Notifications } from '@/components/navbar/notifications';
-import { Notification } from '@/types/notification';
+import { Notification } from '@/types/logs';
 
 const Navbar = () => {
   const { logout } = useAuth();

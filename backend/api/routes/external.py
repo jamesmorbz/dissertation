@@ -6,6 +6,7 @@ from typing import Annotated
 from utils.user import get_current_user
 import json
 from pydantic import BaseModel, Field
+from fastapi_cache.decorator import cache
 
 router = APIRouter()
 
@@ -35,6 +36,7 @@ class CarbonIntensityResponse(BaseModel):
     tags=["Carbon"],
     summary="Show the current carbon intensity at the current moment in time",
 )
+@cache(expire=7200)
 async def carbon_intensity(
     current_user: Annotated[User, Depends(get_current_user)],
 ):

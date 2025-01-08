@@ -13,6 +13,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Session
+from sqlalchemy.orm.state import InstanceState
 
 Base = declarative_base()
 
@@ -72,3 +74,120 @@ class DeviceMapping(Base):
     )
 
     __table_args__ = (PrimaryKeyConstraint("user_id", "hardware_name"),)
+
+
+class Audit(Base):
+    __tablename__ = "audit"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    timestamp = Column(TIMESTAMP, nullable=False, default=func.now())
+    log = Column(Text, nullable=False)
+    details = Column(Text, nullable=True)
+    device = Column(String(30))
+    action_type = Column(String(16))
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    timestamp = Column(TIMESTAMP, nullable=False, default=func.now())
+    message = Column(Text, nullable=False)
+    read = Column(Boolean, nullable=False, default=False)
+
+
+def create_audit_log(
+    session: Session,
+    user_id: int,
+    log: str,
+    details: str,
+    device: str = None,
+    action_type: str = None,
+):
+    """Helper function to create an audit log entry"""
+    audit_entry = Audit(
+        user_id=user_id,
+        log=log,
+        details=details,
+        device=device,
+        action_type=action_type,
+    )
+    session.add(audit_entry)
+
+
+@event.listens_for(DeviceMapping, "before_update")
+def track_device_updates(mapper, connection, target: DeviceMapping):
+    session = Session.object_session(target)
+    if not session:
+        return
+
+    state: InstanceState[DeviceMapping] = inspect(target)
+    changes = []
+
+    if state.attrs.friendly_name.history.has_changes():
+        old_name = (
+            state.attrs.friendly_name.history.deleted[0]
+            if state.attrs.friendly_name.history.deleted
+            else None
+        )
+        new_name = (
+            state.attrs.friendly_name.history.added[0]
+            if state.attrs.friendly_name.history.added
+            else None
+        )
+        changes.append(f"Name changed from '{old_name}' to '{new_name}'")
+
+    if state.attrs.room.history.has_changes():
+        old_room = (
+            state.attrs.room.history.deleted[0]
+            if state.attrs.room.history.deleted
+            else None
+        )
+        new_room = (
+            state.attrs.room.history.added[0]
+            if state.attrs.room.history.added
+            else None
+        )
+        changes.append(f"Room changed from '{old_room}' to '{new_room}'")
+
+    if state.attrs.tag.history.has_changes():
+        old_tag = (
+            state.attrs.tag.history.deleted[0]
+            if state.attrs.tag.history.deleted
+            else None
+        )
+        new_tag = (
+            state.attrs.tag.history.added[0] if state.attrs.tag.history.added else None
+        )
+        changes.append(f"Tag changed from '{old_tag}' to '{new_tag}'")
+
+    if changes:
+        log_message = f"Device Details for {target.hardware_name} were updated"
+        create_audit_log(
+            session,
+            target.user_id,
+            log_message,
+            details=", ".join(changes),
+            device=target.hardware_name,
+            action_type="DEVICE_UPDATE",
+        )
+
+
+@event.listens_for(DeviceMapping, "before_insert")
+def track_device_creation(mapper, connection, target: DeviceMapping):
+    session = Session.object_session(target)
+    if session:
+        create_audit_log(
+            session,
+            target.user_id,
+            f"Device Details for '{target.hardware_name}' were added",
+            details=f"Attributes - Friendly Name: {target.friendly_name}, Room: {target.room}, Tag: {target.tag}",
+            device=target.hardware_name,
+            action_type="DEVICE_ADD",
+        )

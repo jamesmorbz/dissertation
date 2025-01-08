@@ -6,184 +6,137 @@ import { CarbonIntensityCard } from '@/components/dashboard/carbon-intensity-car
 import { EnergyTariffCard } from '@/components/dashboard/energy-tariff-card';
 import { Navbar } from '@/components/navbar/navbar';
 import { Device } from '@/types/device';
-import apiClient from '@/lib/api-client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   LastUsage,
-  WeeklyTotal,
+  WeeklyData,
   BarDataPoint,
   CarbonIntensity,
 } from '@/types/data-point';
 import { SkeletonCard } from '@/components/shared/skeleton-card';
+import { dashboardService } from '@/services/dashboard';
 
 export function Dashboard() {
-  const fetchMonthlySummary = async () => {
-    let weeklyTotals: BarDataPoint[] = [];
-    try {
-      weeklyTotals = (await apiClient.get('/data/monthly-summary')).data;
-      return weeklyTotals;
-    } catch (error) {
-      console.error('Failed to fetch monthly summary:', error);
-      return [];
-    }
-  };
   const [overviewChartData, setOverviewChartData] = useState<
     BarDataPoint[] | null
   >(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const monthlySummary = await fetchMonthlySummary();
-        setOverviewChartData(monthlySummary);
-      } catch (error) {
-        console.error('Error', error);
-      }
-    };
-    fetchData();
-  }, []);
-
-  const [weeklyUsage, setWeeklyUsage] = useState<number | null>(null);
-  const [weeklyUsageTrend, setWeeklyUsageTrend] = useState<number | null>(null);
-  const [thisWeek, setThisWeek] = useState<WeeklyTotal | null>(null);
-  const [lastWeek, setLastWeek] = useState<WeeklyTotal | null>(null);
-
-  const fetchWeeklyTotal = async () => {
-    let weeklyTotals: WeeklyTotal[] = [];
-    try {
-      weeklyTotals = (await apiClient.get('/data/weekly-total')).data;
-      return weeklyTotals;
-    } catch (error) {
-      console.error('Failed to fetch devices:', error);
-      return []; // Return empty array instead of undefined
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const weeklyTotals = await fetchWeeklyTotal();
-
-        const lastWeek = weeklyTotals[0];
-        const thisWeek = weeklyTotals[1];
-        const percentageIncrease =
-          ((thisWeek.total - lastWeek.total) / lastWeek.total) * 100;
-
-        setWeeklyUsageTrend(percentageIncrease);
-        setWeeklyUsage(weeklyTotals[1].total);
-        setLastWeek(lastWeek);
-        setThisWeek(thisWeek);
-      } catch (error) {
-        console.error('Error processing weekly totals:', error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
+  const [weeklyData, setWeeklyData] = useState<WeeklyData>({
+    weeklyUsage: null,
+    weeklyUsageTrend: null,
+    thisWeek: null,
+    lastWeek: null,
+  });
   const [carbonIntensity, setCarbonIntensity] =
     useState<CarbonIntensity | null>(null);
-
-  const fetchCarbonIntensity = async () => {
-    let carbonIntensity: CarbonIntensity;
-    try {
-      carbonIntensity = (await apiClient.get('/external/carbon-intensity'))
-        .data;
-      return carbonIntensity;
-    } catch (error) {
-      console.error('Failed to fetch devices:', error);
-      return null;
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const carbonIntensity = await fetchCarbonIntensity();
-        setCarbonIntensity(carbonIntensity);
-      } catch (error) {
-        console.error('Error processing weekly totals:', error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const energyTariff = 23;
-  const energyTariffTrend = +50;
-
   const [devices, setDevices] = useState<Device[]>([]);
   const [lastUsages, setLastUsages] = useState<LastUsage>({});
-  const [currentTotalUsage, setCurrentTotalUsage] = useState<number>(0);
+  const [currentTotalUsage, setCurrentTotalUsage] = useState<number | null>(
+    null,
+  );
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchDevices = async () => {
-      let deviceResponse: Device[] = [];
+  const fetchWeeklyData = useCallback(async () => {
+    try {
+      const weeklyTotals = await dashboardService.getWeeklyTotal();
+      const lastWeek = weeklyTotals.data[0];
+      const thisWeek = weeklyTotals.data[1];
+      const weeklyUsageTrend =
+        ((thisWeek.total - lastWeek.total) / lastWeek.total) * 100;
 
-      try {
-        deviceResponse = (await apiClient.get('/devices/')).data;
-      } catch (error) {
-        console.error('Failed to fetch devices:', error);
-        return;
-      }
-
-      try {
-        const usageResponse: LastUsage = (
-          await apiClient.get('/data/last_usage')
-        ).data;
-        setLastUsages(usageResponse);
-        deviceResponse.forEach((device) => {
-          const hardwareName = device.hardware_name;
-          if (usageResponse[hardwareName]) {
-            device.last_usage = usageResponse[hardwareName].last_usage;
-          }
-        });
-      } catch (error) {
-        console.error('Failed to fetch usage:', error);
-      }
-
-      setDevices(deviceResponse);
-    };
-
-    fetchDevices();
-    // const interval = setInterval(fetchDevices, 30000);
-    // return () => clearInterval(interval);
+      setWeeklyData({
+        weeklyUsage: thisWeek.total,
+        weeklyUsageTrend,
+        thisWeek,
+        lastWeek,
+      });
+    } catch (error) {
+      console.error('Error fetching weekly totals:', error);
+      setWeeklyData({
+        weeklyUsage: null,
+        weeklyUsageTrend: null,
+        thisWeek: null,
+        lastWeek: null,
+      });
+    }
   }, []);
 
+  const fetchDevicesAndUsage = useCallback(async () => {
+    try {
+      const [deviceData, usageData] = await Promise.all([
+        dashboardService.getDevices(),
+        dashboardService.getLastUsage(),
+      ]);
+
+      const updatedDevices = deviceData.data.map((device) => ({
+        ...device,
+        last_usage: usageData.data[device.hardware_name]?.last_usage ?? 0,
+      }));
+
+      const totalUsage = Object.values(usageData.data).reduce(
+        (sum, hardware) => sum + (hardware.last_usage ?? 0),
+        0,
+      );
+
+      setDevices(updatedDevices);
+      setLastUsages(usageData.data);
+      setCurrentTotalUsage(totalUsage);
+    } catch (error) {
+      console.error('Error fetching devices or usage:', error);
+    }
+  }, []);
+
+  const fetchAllData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      await Promise.all([
+        dashboardService
+          .getMonthlySummary()
+          .then((summary) => setOverviewChartData(summary.data))
+          .catch((error) => {
+            console.error('Error fetching monthly summary:', error);
+            setOverviewChartData(null);
+          }),
+        fetchWeeklyData(),
+        dashboardService
+          .getCarbonIntensity()
+          .then((intensity) => setCarbonIntensity(intensity.data))
+          .catch((error) => {
+            console.error('Error fetching carbon intensity:', error);
+            setCarbonIntensity(null);
+          }),
+        fetchDevicesAndUsage(),
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchWeeklyData, fetchDevicesAndUsage]);
+
   useEffect(() => {
-    const totalUsage: number = Object.values(lastUsages).reduce(
-      (sum, hardware) => sum + hardware.last_usage,
-      0,
-    );
-    setCurrentTotalUsage(totalUsage);
-  }, [lastUsages]);
+    fetchAllData();
+  }, [fetchAllData]);
 
   return (
     <div className="flex min-h-screen w-full flex-col">
       <Navbar />
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        {/* <h2>Hi {firstName}!</h2> */}
         <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-          <CurrentUsageCard last_usage={currentTotalUsage} />
-          {weeklyUsage && weeklyUsageTrend && lastWeek && thisWeek ? (
-            <WeeklyUsageCard
-              weeklyUsage={weeklyUsage}
-              weeklyUsageTrend={weeklyUsageTrend}
-              thisWeek={thisWeek}
-              lastWeek={lastWeek}
-            />
-          ) : (
-            <SkeletonCard />
-          )}
+          <CurrentUsageCard
+            last_usage={currentTotalUsage}
+            onRefresh={fetchDevicesAndUsage}
+          />
+          <WeeklyUsageCard
+            weeklyUsage={weeklyData.weeklyUsage}
+            weeklyUsageTrend={weeklyData.weeklyUsageTrend}
+            thisWeek={weeklyData.thisWeek}
+            lastWeek={weeklyData.lastWeek}
+            onRefresh={fetchWeeklyData}
+          />
           {carbonIntensity ? (
             <CarbonIntensityCard carbonIntensity={carbonIntensity} />
           ) : (
             <SkeletonCard />
           )}
-          <EnergyTariffCard
-            energyTariff={energyTariff}
-            energyTariffTrend={energyTariffTrend}
-          />
+          <EnergyTariffCard energyTariff={23} energyTariffTrend={50} />
         </div>
 
         <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">

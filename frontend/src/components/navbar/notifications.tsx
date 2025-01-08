@@ -1,25 +1,59 @@
 import { Bell } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Notification } from '@/types/notification';
+import apiClient from '@/lib/api-client';
 
-interface NotificationsProps {
-  notifications: Notification[];
+interface Notification {
+  id: number;
+  message: string;
+  timestamp: string;
+  read: boolean;
+  user_id: number;
 }
 
-const Notifications: React.FC<NotificationsProps> = (notifications) => {
-  const unreadCount = notifications.notifications.filter((n) => !n.read).length;
+const Notifications = () => {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const markAllAsRead = () => {
-    notifications.notifications = notifications.notifications.map((n) => ({
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await apiClient.get('/user/notifications');
+      setNotifications(response.data);
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    const updatedNotifications = notifications.map((n) => ({
       ...n,
       read: true,
     }));
+    setNotifications(updatedNotifications);
+
+    try {
+      await apiClient.post('/user/notifications/mark-all-read');
+    } catch (error) {
+      console.error('Failed to mark notifications as read:', error);
+      setNotifications(notifications);
+    }
   };
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  if (loading) {
+    return <Bell className="h-4 w-4 animate-pulse" />;
+  }
 
   return (
     <Popover>
@@ -42,7 +76,7 @@ const Notifications: React.FC<NotificationsProps> = (notifications) => {
           </button>
         </div>
         <div className="space-y-2 max-h-64 overflow-y-auto">
-          {notifications.notifications.map((notification) => (
+          {notifications.map((notification) => (
             <div
               key={notification.id}
               className={`p-2 rounded-lg ${
@@ -51,7 +85,14 @@ const Notifications: React.FC<NotificationsProps> = (notifications) => {
             >
               <p className="text-sm">{notification.message}</p>
               <p className="text-xs text-gray-500">
-                {notification.timestamp.toLocaleTimeString()}
+                {new Date(notification.timestamp)
+                  .toLocaleString('en-UK', {
+                    day: 'numeric',
+                    month: 'short',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                  })
+                  .replace('at', '@')}
               </p>
             </div>
           ))}

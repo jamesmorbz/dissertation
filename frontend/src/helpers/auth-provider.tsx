@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsAuthenticated(true);
       console.log(`Logged in as ${authenticatedUser}`);
     } catch (error) {
-      setIsAuthenticated(false);
+      logout();
       console.error('Token validation failed:', error);
     } finally {
       setLastChecked(now);

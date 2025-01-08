@@ -129,7 +129,7 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
       <Card className="relative h-full hover:shadow-lg">
         {!room && !tag && (
           <div className="absolute left-2 top-2 w-20 bg-purple-400 py-0.5 text-center text-[10px] font-medium text-white rounded">
-            Set Room!
+            Click to Set!
           </div>
         )}
 

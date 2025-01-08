@@ -20,6 +20,13 @@ export type WeeklyTotal = {
   stop: string;
 };
 
+export type WeeklyData = {
+  weeklyUsage: number | null;
+  weeklyUsageTrend: number | null;
+  thisWeek: WeeklyTotal | null;
+  lastWeek: WeeklyTotal | null;
+};
+
 type IntensityPayload = {
   forecast: number;
   actual: number;
