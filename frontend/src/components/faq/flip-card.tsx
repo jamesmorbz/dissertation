@@ -21,7 +21,7 @@ const FlipCard: React.FC<FlipCardProps> = ({
       className="relative h-48 cursor-pointer perspective-1000"
       onClick={() => setIsFlipped(!isFlipped)}
       role="button"
-      tabIndex={0}
+      tabIndex={index}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           setIsFlipped(!isFlipped);

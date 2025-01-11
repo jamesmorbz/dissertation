@@ -1,19 +1,8 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { ChevronDown } from 'lucide-react';
-import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Check, ChevronsUpDown } from 'lucide-react';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
-import { cn } from '@/lib/utils';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 import { toast } from '@/hooks/use-toast';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -23,19 +12,21 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { cn } from '@/lib/utils';
 
 const appearanceFormSchema = z.object({
   theme: z.enum(['light', 'dark'], {
     required_error: 'Please select a theme.',
   }),
   font: z.enum(['inter', 'manrope', 'system'], {
-    invalid_type_error: 'Select a font',
     required_error: 'Please select a font.',
   }),
   language: z.string({
@@ -57,9 +48,9 @@ const languages = [
 
 type AppearanceFormValues = z.infer<typeof appearanceFormSchema>;
 
-// This can come from your database or API.
 const defaultValues: Partial<AppearanceFormValues> = {
   theme: 'dark',
+  font: 'inter',
   language: 'en',
 };
 
@@ -71,13 +62,10 @@ export function AppearanceForm() {
 
   function onSubmit(data: AppearanceFormValues) {
     toast({
-      title: 'You submitted the following values:',
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
+      title: 'Appearance Updated Successfully',
+      description: 'Your appearance settings have been updated.',
     });
+    console.log('Appearance data submitted:', data);
   }
 
   return (
@@ -87,95 +75,107 @@ export function AppearanceForm() {
           control={form.control}
           name="theme"
           render={({ field }) => (
-            <FormItem className="space-y-1">
+            <FormItem>
               <FormLabel>Theme</FormLabel>
+              <FormControl>
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  className="grid max-w-md grid-cols-2 gap-8 pt-2"
+                >
+                  <FormItem>
+                    <FormLabel className="[&:has([data-state=checked])>div]:border-primary">
+                      <FormControl>
+                        <RadioGroupItem value="dark" className="sr-only" />
+                      </FormControl>
+                      <div
+                        className={cn(
+                          'items-center rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground',
+                          field.value === 'dark' && 'border-primary',
+                        )}
+                      >
+                        <div className="space-y-2 rounded-sm bg-slate-950 p-2">
+                          <div className="space-y-2 rounded-md bg-slate-800 p-2 shadow-sm">
+                            <div className="h-2 w-[80px] rounded-lg bg-slate-400" />
+                            <div className="h-2 w-[100px] rounded-lg bg-slate-400" />
+                          </div>
+                          <div className="flex items-center space-x-2 rounded-md bg-slate-800 p-2 shadow-sm">
+                            <div className="h-4 w-4 rounded-full bg-slate-400" />
+                            <div className="h-2 w-[100px] rounded-lg bg-slate-400" />
+                          </div>
+                          <div className="flex items-center space-x-2 rounded-md bg-slate-800 p-2 shadow-sm">
+                            <div className="h-4 w-4 rounded-full bg-slate-400" />
+                            <div className="h-2 w-[100px] rounded-lg bg-slate-400" />
+                          </div>
+                        </div>
+                      </div>
+                      <span className="block w-full p-2 text-center font-normal">
+                        Dark
+                      </span>
+                    </FormLabel>
+                  </FormItem>
+                  <FormItem>
+                    <FormLabel className="[&:has([data-state=checked])>div]:border-primary">
+                      <FormControl>
+                        <RadioGroupItem value="light" className="sr-only" />
+                      </FormControl>
+                      <div
+                        className={cn(
+                          'items-center rounded-md border-2 border-muted p-1 hover:border-accent',
+                          field.value === 'light' && 'border-primary',
+                        )}
+                      >
+                        <div className="space-y-2 rounded-sm bg-[#ecedef] p-2">
+                          <div className="space-y-2 rounded-md bg-white p-2 shadow-sm">
+                            <div className="h-2 w-[80px] rounded-lg bg-[#ecedef]" />
+                            <div className="h-2 w-[100px] rounded-lg bg-[#ecedef]" />
+                          </div>
+                          <div className="flex items-center space-x-2 rounded-md bg-white p-2 shadow-sm">
+                            <div className="h-4 w-4 rounded-full bg-[#ecedef]" />
+                            <div className="h-2 w-[100px] rounded-lg bg-[#ecedef]" />
+                          </div>
+                          <div className="flex items-center space-x-2 rounded-md bg-white p-2 shadow-sm">
+                            <div className="h-4 w-4 rounded-full bg-[#ecedef]" />
+                            <div className="h-2 w-[100px] rounded-lg bg-[#ecedef]" />
+                          </div>
+                        </div>
+                      </div>
+                      <span className="block w-full p-2 text-center font-normal">
+                        Light
+                      </span>
+                    </FormLabel>
+                  </FormItem>
+                </RadioGroup>
+              </FormControl>
               <FormDescription>
                 Select the theme for the dashboard.
               </FormDescription>
               <FormMessage />
-              <RadioGroup
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-                className="grid max-w-md grid-cols-2 gap-8 pt-2"
-              >
-                <FormItem>
-                  <FormLabel className="[&:has([data-state=checked])>div]:border-primary">
-                    <FormControl>
-                      <RadioGroupItem value="dark" className="sr-only" />
-                    </FormControl>
-                    <div className="items-center rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground">
-                      <div className="space-y-2 rounded-sm bg-slate-950 p-2">
-                        <div className="space-y-2 rounded-md bg-slate-800 p-2 shadow-sm">
-                          <div className="h-2 w-[80px] rounded-lg bg-slate-400" />
-                          <div className="h-2 w-[100px] rounded-lg bg-slate-400" />
-                        </div>
-                        <div className="flex items-center space-x-2 rounded-md bg-slate-800 p-2 shadow-sm">
-                          <div className="h-4 w-4 rounded-full bg-slate-400" />
-                          <div className="h-2 w-[100px] rounded-lg bg-slate-400" />
-                        </div>
-                        <div className="flex items-center space-x-2 rounded-md bg-slate-800 p-2 shadow-sm">
-                          <div className="h-4 w-4 rounded-full bg-slate-400" />
-                          <div className="h-2 w-[100px] rounded-lg bg-slate-400" />
-                        </div>
-                      </div>
-                    </div>
-                    <span className="block w-full p-2 text-center font-normal">
-                      Dark
-                    </span>
-                  </FormLabel>
-                </FormItem>
-                <FormItem>
-                  <FormLabel className="[&:has([data-state=checked])>div]:border-primary">
-                    <FormControl>
-                      <RadioGroupItem value="light" className="sr-only" />
-                    </FormControl>
-                    <div className="items-center rounded-md border-2 border-muted p-1 hover:border-accent">
-                      <div className="space-y-2 rounded-sm bg-[#ecedef] p-2">
-                        <div className="space-y-2 rounded-md bg-white p-2 shadow-sm">
-                          <div className="h-2 w-[80px] rounded-lg bg-[#ecedef]" />
-                          <div className="h-2 w-[100px] rounded-lg bg-[#ecedef]" />
-                        </div>
-                        <div className="flex items-center space-x-2 rounded-md bg-white p-2 shadow-sm">
-                          <div className="h-4 w-4 rounded-full bg-[#ecedef]" />
-                          <div className="h-2 w-[100px] rounded-lg bg-[#ecedef]" />
-                        </div>
-                        <div className="flex items-center space-x-2 rounded-md bg-white p-2 shadow-sm">
-                          <div className="h-4 w-4 rounded-full bg-[#ecedef]" />
-                          <div className="h-2 w-[100px] rounded-lg bg-[#ecedef]" />
-                        </div>
-                      </div>
-                    </div>
-                    <span className="block w-full p-2 text-center font-normal">
-                      Light
-                    </span>
-                  </FormLabel>
-                </FormItem>
-              </RadioGroup>
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="font"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Font</FormLabel>
-              <div className="relative w-max">
-                <FormControl>
-                  <select
-                    className={cn(
-                      buttonVariants({ variant: 'outline' }),
-                      'w-[200px] appearance-none font-normal',
-                    )}
-                    {...field}
-                  >
-                    <option value="inter">Inter</option>
-                    <option value="manrope">Manrope</option>
-                    <option value="system">System</option>
-                  </select>
-                </FormControl>
-                <ChevronDown className="absolute right-3 top-2.5 h-4 w-4 opacity-50" />
-              </div>
+              <FormControl>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a font" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="inter">Inter</SelectItem>
+                    <SelectItem value="manrope">Manrope</SelectItem>
+                    <SelectItem value="system">System</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
               <FormDescription>
                 Set the font you want to use in the dashboard.
               </FormDescription>
@@ -183,63 +183,31 @@ export function AppearanceForm() {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="language"
           render={({ field }) => (
-            <FormItem className="flex flex-col">
+            <FormItem>
               <FormLabel>Language</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      disabled={true}
-                      className={cn(
-                        'w-[200px] justify-between',
-                        !field.value && 'text-muted-foreground',
-                      )}
-                    >
-                      {field.value
-                        ? languages.find(
-                            (language) => language.value === field.value,
-                          )?.label
-                        : 'Select language'}
-                      <ChevronsUpDown className="opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
-                  <Command>
-                    <CommandInput placeholder="Search language..." />
-                    <CommandList>
-                      <CommandEmpty>No language found.</CommandEmpty>
-                      <CommandGroup>
-                        {languages.map((language) => (
-                          <CommandItem
-                            value={language.label}
-                            key={language.value}
-                            onSelect={() => {
-                              form.setValue('language', language.value);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                'mr-2',
-                                language.value === field.value
-                                  ? 'opacity-100'
-                                  : 'opacity-0',
-                              )}
-                            />
-                            {language.label}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+              <FormControl>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  disabled={true}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languages.map((language) => (
+                      <SelectItem key={language.value} value={language.value}>
+                        {language.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
               <FormDescription>
                 Coming Soon! Multi-language support.
               </FormDescription>
@@ -247,6 +215,7 @@ export function AppearanceForm() {
             </FormItem>
           )}
         />
+
         <Button type="submit">Update preferences</Button>
       </form>
     </Form>

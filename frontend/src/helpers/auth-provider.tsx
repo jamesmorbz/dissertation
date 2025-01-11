@@ -5,7 +5,7 @@ import React, {
   useCallback,
   useEffect,
 } from 'react';
-import apiClient from '@/lib/api-client';
+import { userService } from '@/services/user';
 
 interface AuthContextType {
   isAuthenticated: boolean | null;
@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      const response = await apiClient.get('/user/verify-token');
+      const response = await userService.verifyToken();
       setAuthenticatedUser(response.data.username);
       setIsAuthenticated(true);
       console.log(`Logged in as ${authenticatedUser}`);

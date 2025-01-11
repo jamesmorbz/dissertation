@@ -131,7 +131,7 @@ async def devices_current_state(
 
 
 @router.get(
-    "/get/{hardware_name}",
+    "/info/{hardware_name}",
     tags=["Device"],
     summary="Get the DeviceMapping a given device",
 )

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Body
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from fastapi.security import OAuth2PasswordRequestForm
@@ -22,8 +22,15 @@ from fastapi.security import OAuth2PasswordBearer
 
 router = APIRouter()
 
+
 ACCESS_TOKEN_EXPIRE_MINUTES = 120
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+class PasswordForm(BaseModel):
+    current_password: str
+    new_password: str
+    confirm_password: str
 
 
 class UserCreate(BaseModel):
@@ -110,6 +117,45 @@ def login_for_access_token(
         "token_type": "bearer",
         "expires": access_token_expires,
     }
+
+
+@router.post("/change-password")
+def change_password(
+    current_user: Annotated[User, Depends(get_current_user)],
+    password_form: PasswordForm = Body(...),
+    db: Session = Depends(sql_client_dependency),
+):
+    if password_form.current_password == password_form.new_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password must be different",
+        )
+
+    user = authenticate_user(current_user.username, password_form.current_password, db)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect password",
+        )
+    assert user == current_user  # Protective Double Check
+
+    try:
+        hashed_password = hash_password(password_form.new_password)
+        current_password = (
+            db.query(Passwords).filter(Passwords.user_id == user.id).first()
+        )
+        current_password.password_hash = hashed_password
+        notifications = Notification(user_id=user.id, message="Password changed!")
+        db.add(notifications)
+        db.commit()
+        return {"message": "Password updated successfully"}
+    except:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update password",
+        )
 
 
 @router.get("/current-user")

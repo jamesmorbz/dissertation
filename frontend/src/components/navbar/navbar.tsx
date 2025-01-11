@@ -13,11 +13,9 @@ import {
 
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Notifications } from '@/components/navbar/notifications';
-import { Notification } from '@/types/logs';
 
 const Navbar = () => {
   const { logout } = useAuth();
-  const notifications: Notification[] = [];
   const links = [
     { to: '/dashboard', label: 'Dashboard' },
     { to: '/devices', label: 'Devices' },
@@ -81,7 +79,7 @@ const Navbar = () => {
           </SheetContent>
         </Sheet>
         <div className="flex items-center gap-4 ml-auto">
-          <Notifications notifications={notifications} />
+          <Notifications />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="icon" className="rounded-full">

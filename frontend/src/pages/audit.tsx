@@ -10,7 +10,7 @@ import { Navbar } from '@/components/navbar/navbar';
 import { AuditLog } from '@/types/logs';
 import { AuditTable } from '@/components/audit/table';
 import { Pagination } from '@/components/audit/pagination';
-import apiClient from '@/lib/api-client';
+import { auditService } from '@/services/audit';
 
 const PAGE_SIZE = 15;
 
@@ -24,8 +24,8 @@ export const Audit: React.FC = () => {
     const fetchLogs = async () => {
       try {
         setIsLoading(true);
-        const data = (await apiClient.get('/user/audit')).data;
-        setLogs(data);
+        const response = await auditService.getAuditLogs();
+        setLogs(response.data);
       } catch (error) {
         console.error('Error fetching audit logs:', error);
       } finally {

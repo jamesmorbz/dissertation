@@ -5,7 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import apiClient from '@/lib/api-client';
+import { auditService } from '@/services/audit';
 
 interface Notification {
   id: number;
@@ -25,7 +25,7 @@ const Notifications = () => {
 
   const fetchNotifications = async () => {
     try {
-      const response = await apiClient.get('/user/notifications');
+      const response = await auditService.getNotifications();
       setNotifications(response.data);
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
@@ -35,17 +35,15 @@ const Notifications = () => {
   };
 
   const markAllAsRead = async () => {
-    const updatedNotifications = notifications.map((n) => ({
-      ...n,
-      read: true,
-    }));
-    setNotifications(updatedNotifications);
-
     try {
-      await apiClient.post('/user/notifications/mark-all-read');
+      await auditService.markNotificationsRead();
+      const updatedNotifications = notifications.map((n) => ({
+        ...n,
+        read: true,
+      }));
+      setNotifications(updatedNotifications);
     } catch (error) {
       console.error('Failed to mark notifications as read:', error);
-      setNotifications(notifications);
     }
   };
 

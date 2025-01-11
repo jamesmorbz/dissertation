@@ -5,8 +5,8 @@ import { DeviceCard } from '@/components/devices/device-card';
 import { Device } from '@/types/device';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import apiClient from '@/lib/api-client';
 import { LastUsage } from '@/types/data-point';
+import { deviceService } from '@/services/devices';
 
 export function Devices() {
   const { toast } = useToast();
@@ -15,15 +15,16 @@ export function Devices() {
   const fetchDevices = useCallback(async () => {
     let deviceResponse: Device[] = [];
     try {
-      deviceResponse = (await apiClient.get('/devices/')).data;
+      deviceResponse = (await deviceService.getDevices()).data;
     } catch (error) {
       console.error('Failed to fetch devices:', error);
       return;
     }
 
     try {
-      const usageResponse: LastUsage = (await apiClient.get('/data/last_usage'))
-        .data;
+      const usageResponse: LastUsage = (
+        await deviceService.getDeviceLastUsage()
+      ).data;
       deviceResponse.forEach((device) => {
         const hardwareName = device.hardware_name;
         if (usageResponse[hardwareName]) {
@@ -94,7 +95,7 @@ export function Devices() {
     updates: Partial<Device>,
   ) => {
     try {
-      await apiClient.put(`/devices/${hardware_name}`, updates);
+      await deviceService.updateDevice(`/devices/${hardware_name}`, updates);
 
       toast({
         title: 'Device Updated',

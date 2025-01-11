@@ -2,7 +2,7 @@ class InfluxDBQueries:
     @staticmethod
     def get_distinct_devices_query():
         return """
-        from(bucket: "metrics")
+        from(bucket: "distinct_devices")
             |> range(start: -90d)
             |> keep(columns: ["hardware_name"])
             |> distinct(column: "hardware_name")
@@ -12,7 +12,7 @@ class InfluxDBQueries:
     def get_device_status_query():
         return """
         from(bucket: "metrics")
-            |> range(start: -30d)
+            |> range(start: -6h)
             |> filter(fn: (r) => r["_measurement"] == "fluentbit.status")
             |> filter(fn: (r) => r["_field"] == "power" or r["_field"] == "uptime" or r["_field"] == "wifi_rssi" or r["_field"] == "wifi_signal")
             |> last()
@@ -22,7 +22,7 @@ class InfluxDBQueries:
     def get_last_usage_query():
         return """
         from(bucket: "metrics")
-            |> range(start: -30d)
+            |> range(start: -6h)
             |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
             |> filter(fn: (r) => r["_field"] == "power")
             |> map(fn: (r) => ({r with _unix: uint(v: r._time) }))
@@ -61,13 +61,13 @@ class InfluxDBQueries:
         return """
             union(
                 tables: [
-                    from(bucket: "metrics")
+                    from(bucket: "1d-aggregated")
                         |> range(start: -14d, stop: -7d)
                         |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
                         |> filter(fn: (r) => r["_field"] == "power")
                         |> group()
                         |> sum(),
-                    from(bucket: "metrics")
+                    from(bucket: "1d-aggregated")
                         |> range(start: -7d, stop: now())
                         |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
                         |> filter(fn: (r) => r["_field"] == "power")
@@ -80,25 +80,17 @@ class InfluxDBQueries:
     @staticmethod
     def get_monthly_summary_query():
         return """
-            from(bucket: "metrics")
+            from(bucket: "1d-aggregated")
             |> range(start: -30d)
             |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
             |> filter(fn: (r) => r["_field"] == "power")
-            |> aggregateWindow(every: 1d, fn: sum, createEmpty: true)
-            |> fill(value:0.0)
-            |> map(fn: (r) => ({r with _time: 
-                if int(v: r._stop) - int(v: r._time) < 100000 then
-                    r._time
-                else
-                    time(v: int(v: r._time) - 86400000000000)
-            }))
         """
 
     @staticmethod
     def get_daily_aggregated_data_query(lookback_days: int, device_id: str = None):
         if device_id is None:
             return f"""
-                from(bucket: "metrics")
+                from(bucket: "1d-aggregated")
                 |> range(start: -{lookback_days}d)
                 |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
                 |> filter(fn: (r) => r["_field"] == "power")
@@ -107,7 +99,7 @@ class InfluxDBQueries:
             """
         else:
             return f"""
-                from(bucket: "metrics")
+                from(bucket: "1d-aggregated")
                 |> range(start: -{lookback_days}d)
                 |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
                 |> filter(fn: (r) => r["_field"] == "power")

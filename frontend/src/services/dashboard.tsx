@@ -1,4 +1,3 @@
-// services/dashboardService.ts
 import apiClient from '@/lib/api-client';
 import {
   BarDataPoint,

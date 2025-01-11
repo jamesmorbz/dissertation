@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/helpers/auth-provider';
 import { Toaster } from '@/components/ui/toaster';
 import {
   Form,
@@ -52,6 +53,7 @@ const defaultValues: Partial<ProfileFormValues> = {
 };
 
 export function ProfileForm() {
+  const { logout } = useAuth();
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues,
@@ -80,8 +82,7 @@ export function ProfileForm() {
 
     setIsLoading(true);
     try {
-      // Here you would typically upload the file to your server
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setSavedProfilePicture(profilePicture);
       toast({
         title: 'Profile Picture Saved',
@@ -101,8 +102,7 @@ export function ProfileForm() {
   async function handleRemoveProfilePicture() {
     setIsLoading(true);
     try {
-      // Here you would typically delete the file from your server
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setProfilePicture(null);
       setSavedProfilePicture(null);
 
@@ -134,7 +134,7 @@ export function ProfileForm() {
       variant: 'destructive',
     });
     setTimeout(() => {
-      navigate('/');
+      logout();
     }, 2000);
   }
 
@@ -247,9 +247,11 @@ export function ProfileForm() {
             <FormControl>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" type="button">
-                    Deactivate Account
-                  </Button>
+                  <div>
+                    <Button variant="destructive" type="button">
+                      Deactivate Account
+                    </Button>
+                  </div>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
@@ -269,9 +271,6 @@ export function ProfileForm() {
                 </AlertDialogContent>
               </AlertDialog>
             </FormControl>
-            <FormDescription>
-              This action cannot be undone. Please be certain.
-            </FormDescription>
             <FormMessage />
           </FormItem>
         </div>

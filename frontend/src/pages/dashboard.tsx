@@ -7,12 +7,7 @@ import { EnergyTariffCard } from '@/components/dashboard/energy-tariff-card';
 import { Navbar } from '@/components/navbar/navbar';
 import { Device } from '@/types/device';
 import { useState, useEffect, useCallback } from 'react';
-import {
-  LastUsage,
-  WeeklyData,
-  BarDataPoint,
-  CarbonIntensity,
-} from '@/types/data-point';
+import { WeeklyData, BarDataPoint, CarbonIntensity } from '@/types/data-point';
 import { SkeletonCard } from '@/components/shared/skeleton-card';
 import { dashboardService } from '@/services/dashboard';
 
@@ -29,11 +24,10 @@ export function Dashboard() {
   const [carbonIntensity, setCarbonIntensity] =
     useState<CarbonIntensity | null>(null);
   const [devices, setDevices] = useState<Device[]>([]);
-  const [lastUsages, setLastUsages] = useState<LastUsage>({});
   const [currentTotalUsage, setCurrentTotalUsage] = useState<number | null>(
     null,
   );
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
 
   const fetchWeeklyData = useCallback(async () => {
     try {
@@ -78,7 +72,6 @@ export function Dashboard() {
       );
 
       setDevices(updatedDevices);
-      setLastUsages(usageData.data);
       setCurrentTotalUsage(totalUsage);
     } catch (error) {
       console.error('Error fetching devices or usage:', error);
