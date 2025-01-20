@@ -19,7 +19,7 @@ def gen_rand_float(low, high):
 
 def format_usage_payload(power, voltage, current):
     return {
-        "Time": datetime.datetime.now().isoformat(),
+        "Time": datetime.datetime.now().replace(microsecond=0).isoformat(sep="T"),
         "ENERGY": {
             "Power": power,
             "Voltage": voltage,
@@ -30,7 +30,7 @@ def format_usage_payload(power, voltage, current):
 
 def format_status_payload(network_name):
     return {
-        "Time": datetime.datetime.now().isoformat(),
+        "Time": datetime.datetime.now().replace(microsecond=0).isoformat(sep="T"),
         "POWER": "ON",
         "UptimeSec": int(time.time() - PROCESS_START_TIME),
         "Wifi": {

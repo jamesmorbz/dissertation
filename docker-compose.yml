@@ -1,45 +1,27 @@
 services:
+  # backfill:
+  #   build: ./backfill
+  #   restart: always
+  #   depends_on:
+  #     - fluentbit
+
   # plug-wizard:
   #   build: ./plug-wizard
   #   restart: always
 
-  influxdb:
-    image: influxdb:2.7.10
-    restart: always
-    ports:
-      - "8086:8086"
-    environment:
-      - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_USERNAME=admin
-      - DOCKER_INFLUXDB_INIT_PASSWORD=admin_password
-      - DOCKER_INFLUXDB_INIT_ORG=diss
-      - DOCKER_INFLUXDB_INIT_BUCKET=metrics
-      # - DOCKER_INFLUXDB_INIT_RETENTION=7d
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-secret-token
-    volumes:
-      - ./diss-docker/influxdb:/var/lib/influxdb2
-    # healthcheck:
-    #   test: ["CMD", "curl", "-sS", "http://localhost:8086/health"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 5
+  # plug-controller:
+  #   build: ./plug-controller
+  #   restart: always
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - mqtt
 
-  postgres:
-    image: postgres:17.0
+  mock-plug-data-pusher:
+    build: ./mock-plug-data-pusher
     restart: always
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=mypassword
-      - POSTGRES_DB=admin
-    volumes:
-      - ./diss-docker/postgres:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d admin"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+    depends_on:
+      - mqtt
 
   mqtt:
     image: eclipse-mosquitto:2.0.18
@@ -51,35 +33,54 @@ services:
       - ./diss-docker/mosquitto/data:/mosquitto/data
       - ./diss-docker/mosquitto/log:/mosquitto/log
 
-  mqtt-scraper:
-    build: ./mqtt-scraper
-    restart: always
-    depends_on:
-      - mqtt
-
-  mock-plug-data-pusher:
-    build: ./mock-plug-data-pusher
-    restart: always
-    depends_on:
-      - mqtt
-
-  plug-controller:
-    build: ./plug-controller
-    restart: always
-    ports:
-      - "3000:3000"
-    depends_on:
-      - mqtt
-
-  fluentbit:
-    image: fluent/fluent-bit:3.1.9
-    ports:
-      - "24224:24224"
+  telegraf:
+    image: telegraf:1.33.1
+    restart: unless-stopped
+    environment:
+      - INFLUX_TOKEN=my-secret-token
     volumes:
-      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
     depends_on:
+      - mqtt
       - influxdb
-      - mqtt-scraper
+
+  influxdb:
+    image: influxdb:2.7.10
+    restart: always
+    ports:
+      - "8086:8086"
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=admin123
+      - DOCKER_INFLUXDB_INIT_ORG=diss
+      - DOCKER_INFLUXDB_INIT_BUCKET=metrics
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-secret-token
+    volumes:
+      - ./diss-docker/influxdb:/var/lib/influxdb2
+      - ./init_influx.sh:/docker-entrypoint-initdb.d/init_influx.sh
+    healthcheck:
+      test: ["CMD", "curl", "-sS", "http://localhost:8086/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # postgres:
+  #   image: postgres:17.0
+  #   restart: always
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     - POSTGRES_USER=admin
+  #     - POSTGRES_PASSWORD=mypassword
+  #     - POSTGRES_DB=admin
+  #   volumes:
+  #     - ./diss-docker/postgres:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U admin -d admin"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
 
   backend:
     build: ./backend
@@ -101,6 +102,6 @@ services:
 volumes:
   influxdb-data:  # Named volume for InfluxDB data
   postgres-data:  # Named volume for Postgres data
-  fluentbit-log:    # Named volume for Fluentd logs
+  fluentbit-log:  # Named volume for Fluentd logs
   mosquitto-data: # Named volume for Mosquitto data
   mosquitto-log:  # Named volume for Mosquitto logs

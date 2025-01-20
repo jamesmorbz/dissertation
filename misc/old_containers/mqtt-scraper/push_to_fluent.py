@@ -42,6 +42,7 @@ def on_message(client, userdata, msg: MQTTMessage):
 
     if topic.endswith("SENSOR"):
         fluentbit_payload = {
+            "time": payload["Time"],
             "hardware_name": topic.split("/")[1],
             "source_topic": topic,
             "power": payload["ENERGY"]["Power"],
@@ -51,6 +52,7 @@ def on_message(client, userdata, msg: MQTTMessage):
         tag = "wattage"
     elif topic.endswith("STATE"):
         fluentbit_payload = {
+            "time": payload["Time"],
             "hardware_name": topic.split("/")[1],
             "source_topic": topic,
             "wifi_name": payload["Wifi"]["SSId"],
