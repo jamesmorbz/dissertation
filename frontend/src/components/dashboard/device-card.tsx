@@ -11,10 +11,10 @@ interface DeviceCardProps {
 
 const DeviceCard: React.FC<DeviceCardProps> = ({ devices }) => {
   const onlineDevicesCount = devices.filter(
-    (device) => device.power === true,
+    (device) => device.power === true && device.last_usage !== 0,
   ).length;
   const idleDevicesCount = devices.filter(
-    (device) => device.power === false,
+    (device) => device.power === false || device.last_usage === 0,
   ).length;
   const offlineDevicesCount = devices.filter(
     (device) => device.power === null,

@@ -95,7 +95,7 @@ export function Devices() {
     updates: Partial<Device>,
   ) => {
     try {
-      await deviceService.updateDevice(`/devices/${hardware_name}`, updates);
+      await deviceService.updateDevice(hardware_name, updates);
 
       toast({
         title: 'Device Updated',

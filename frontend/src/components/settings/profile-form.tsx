@@ -27,7 +27,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { useNavigate } from 'react-router-dom';
 
 const profileFormSchema = z.object({
   username: z
@@ -61,7 +60,6 @@ export function ProfileForm() {
   });
 
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [savedProfilePicture, setSavedProfilePicture] = useState<File | null>(
     null,

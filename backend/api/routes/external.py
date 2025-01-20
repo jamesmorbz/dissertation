@@ -37,7 +37,7 @@ class CarbonIntensityResponse(BaseModel):
     summary="Show the current carbon intensity at the current moment in time",
 )
 @cache(expire=7200)
-async def carbon_intensity(
+def carbon_intensity(
     current_user: Annotated[User, Depends(get_current_user)],
 ):
     # if current_user.postcode: TODO: Use user Location
@@ -56,7 +56,7 @@ async def carbon_intensity(
     # tags=[" "],
     summary="Show future carbon intensity forecast from now to now + 72 hours",
 )
-async def forecast(
+def forecast(
     hardware_name: str,
     current_user: Annotated[User, Depends(get_current_user)],
 ):

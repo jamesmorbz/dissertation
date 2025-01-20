@@ -76,7 +76,7 @@ const OverviewChart: React.FC<OverviewChartProps> = ({ overviewChartData }) => {
               }}
               tickMargin={8}
               label={{
-                value: 'Power (kW)',
+                value: 'Power (kWh)',
                 position: 'center',
                 angle: -90,
               }}

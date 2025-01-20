@@ -100,7 +100,7 @@ const WeeklyUsageCard: React.FC<WeeklyUsageCardProps> = ({
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">
-          {(weeklyUsage / 1000).toFixed(2)}kW
+          {(weeklyUsage / 1000).toFixed(2)}kWh
         </div>
         <p className="text-xs text-muted-foreground">{tagline}%</p>
         <p className="text-xs text-muted-foreground">

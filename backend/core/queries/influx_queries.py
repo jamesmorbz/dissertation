@@ -57,18 +57,18 @@ class InfluxDBQueries:
         """
 
     @staticmethod
-    def get_weekly_summary_query():
+    def get_weekly_summary_query():  # TODO: start: -14d, stop: -7d, start: -7d, stop: now()
         return """
             union(
                 tables: [
                     from(bucket: "1d-aggregated")
-                        |> range(start: -14d, stop: -7d)
+                        |> range(start: -14d, stop: -7d) 
                         |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
                         |> filter(fn: (r) => r["_field"] == "power")
                         |> group()
                         |> sum(),
                     from(bucket: "1d-aggregated")
-                        |> range(start: -7d, stop: now())
+                        |> range(start: -7d, stop: now()) 
                         |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
                         |> filter(fn: (r) => r["_field"] == "power")
                         |> group()

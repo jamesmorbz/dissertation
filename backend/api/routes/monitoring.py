@@ -59,7 +59,7 @@ class HealthCheck:
 
 
 @router.get("/", response_model=BackendStatus)
-async def read_root():
+def read_root():
     return {
         "message": "For interactive documentation, please visit /docs",
         "fastapi_version": fastapi.__version__,

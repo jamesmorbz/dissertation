@@ -10,8 +10,6 @@ from utils.user import get_current_user
 from core.models import User, DeviceMapping
 from typing import Optional
 from sqlalchemy.orm import Session
-from fastapi_cache.decorator import cache
-from utils.cache import cache_entry_user_pk
 
 router = APIRouter()
 
@@ -54,7 +52,7 @@ class DeviceStatus(BaseModel):
     tags=["Device"],
     summary="Update device metadata (friendly name, tag)",
 )
-async def update_device_details(
+def update_device_details(
     hardware_name: str,
     device_update: DeviceUpdate,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -87,8 +85,8 @@ async def update_device_details(
     tags=["All Devices"],
     summary="Get the current status of all devices",
 )
-@cache(expire=60, key_builder=cache_entry_user_pk)  # TODO a bit aggresive??
-async def devices_current_state(
+# @cache(expire=60, key_builder=cache_entry_user_pk)  # TODO a bit aggresive??
+def devices_current_state(
     current_user: Annotated[
         User, Depends(get_current_user)
     ],  # TODO: add user validation to influxDB data get
@@ -135,7 +133,7 @@ async def devices_current_state(
     tags=["Device"],
     summary="Get the DeviceMapping a given device",
 )
-async def devices_current_state(
+def devices_current_state(
     hardware_name: str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(sql_client_dependency),
@@ -159,7 +157,7 @@ async def devices_current_state(
 @router.get(
     "/device_reliability", tags=["All Devices"], summary="Reliability of Devices"
 )
-async def device_reliability(
+def device_reliability(
     current_user: Annotated[
         User, Depends(get_current_user)
     ],  # TODO: add user validation to influxDB data get
@@ -209,7 +207,7 @@ async def device_reliability(
     tags=["All Devices"],
     summary="Get the DeviceMapping for all devices",
 )
-async def devices_current_state(
+def devices_current_state(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(sql_client_dependency),
 ):

@@ -9,7 +9,8 @@ import { Device } from '@/types/device';
 import { useState, useEffect, useCallback } from 'react';
 import { WeeklyData, BarDataPoint, CarbonIntensity } from '@/types/data-point';
 import { SkeletonCard } from '@/components/shared/skeleton-card';
-import { dashboardService } from '@/services/dashboard';
+import { dataService } from '@/services/data';
+import { deviceService } from '@/services/devices';
 
 export function Dashboard() {
   const [overviewChartData, setOverviewChartData] = useState<
@@ -31,7 +32,7 @@ export function Dashboard() {
 
   const fetchWeeklyData = useCallback(async () => {
     try {
-      const weeklyTotals = await dashboardService.getWeeklyTotal();
+      const weeklyTotals = await dataService.getWeeklyTotal();
       const lastWeek = weeklyTotals.data[0];
       const thisWeek = weeklyTotals.data[1];
       const weeklyUsageTrend =
@@ -57,8 +58,8 @@ export function Dashboard() {
   const fetchDevicesAndUsage = useCallback(async () => {
     try {
       const [deviceData, usageData] = await Promise.all([
-        dashboardService.getDevices(),
-        dashboardService.getLastUsage(),
+        deviceService.getDevices(),
+        deviceService.getDeviceLastUsage(),
       ]);
 
       const updatedDevices = deviceData.data.map((device) => ({
@@ -82,7 +83,7 @@ export function Dashboard() {
     setIsLoading(true);
     try {
       await Promise.all([
-        dashboardService
+        dataService
           .getMonthlySummary()
           .then((summary) => setOverviewChartData(summary.data))
           .catch((error) => {
@@ -90,7 +91,7 @@ export function Dashboard() {
             setOverviewChartData(null);
           }),
         fetchWeeklyData(),
-        dashboardService
+        dataService
           .getCarbonIntensity()
           .then((intensity) => setCarbonIntensity(intensity.data))
           .catch((error) => {

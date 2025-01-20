@@ -1,11 +1,10 @@
 import axios from 'axios';
 
-// Create an Axios instance
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8000', // Your API base URL
+  baseURL: 'http://localhost:8000',
+  timeout: 10000, //TODO - Could add an interceptor
 });
 
-// Add a request interceptor to include the token
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');

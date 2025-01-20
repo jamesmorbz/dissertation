@@ -53,7 +53,7 @@ class LastUsage(BaseModel):
 
 
 class WeeklySummary(BaseModel):
-    total: int
+    total: float
     start: str
     stop: str
 
@@ -72,7 +72,7 @@ class WeeklySummary(BaseModel):
     tags=["Device"],
     summary="Get Power Usage Data for a Device",
 )
-async def get_device_data(
+def get_device_data(
     device_id: str,  # TODO remove this default value
     start_timestamp: int = int(datetime.now().timestamp()),
     lookback: str = "15m",
@@ -98,7 +98,7 @@ async def get_device_data(
     tags=["Device"],
     summary="TBC",
 )
-async def get_device_daily_data(
+def get_device_daily_data(
     device_id: str,
     lookback_days: int = 7,
     influx_client: InfluxDBClient = Depends(influxdb_client_dependency),
@@ -118,7 +118,7 @@ async def get_device_daily_data(
     summary="Get the current status of all devices",
 )
 @cache(expire=60, key_builder=cache_entry_user_pk)
-async def last_usage(
+def last_usage(
     current_user: Annotated[
         User, Depends(get_current_user)
     ],  # TODO: add user validation to influxDB data get
@@ -143,7 +143,7 @@ async def last_usage(
     tags=["All Devices", "Summary"],
     summary="Last 14 Days in Weekly Total Chunks",
 )
-async def get_weekly_total(
+def get_weekly_total(
     influx_client: InfluxDBClient = Depends(influxdb_client_dependency),
 ):
     query = InfluxDBQueries.get_weekly_summary_query()
@@ -167,7 +167,7 @@ async def get_weekly_total(
 
 
 @router.get("/monthly-summary", tags=["All Devices", "Summary"])
-async def get_monthly_summary(
+def get_monthly_summary(
     current_user: Annotated[
         User, Depends(get_current_user)
     ],  # TODO: add user validation to influxDB data get
@@ -191,7 +191,7 @@ async def get_monthly_summary(
     for row in rows:
         date = row["_time"].split("T")[0]
         hardware_name = row["hardware_name"]
-        value = row["_value"] / 1000 * (1 / 360)  # TODO
+        value = row["_value"]
         room = devices_pk_hw_name.get(hardware_name, "Unknown")
 
         if date not in results:
@@ -208,7 +208,7 @@ async def get_monthly_summary(
     tags=["Summary", "Device"],
     summary="TBC1",
 )
-async def get_daily_data(
+def get_daily_data(
     lookback_days: int = 7,
     influx_client: InfluxDBClient = Depends(influxdb_client_dependency),
 ):

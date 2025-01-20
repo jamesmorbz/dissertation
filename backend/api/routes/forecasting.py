@@ -17,5 +17,5 @@ class DataPoint:
     # tags=[" "],
     summary="Estimate the future usage of devices",
 )
-async def forecast():
+def forecast():
     return "Filler"

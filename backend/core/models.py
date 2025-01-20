@@ -72,7 +72,7 @@ class DeviceMapping(Base):
         TIMESTAMP, nullable=False, default=func.now(), onupdate=func.now()
     )
 
-    __table_args__ = (PrimaryKeyConstraint("user_id", "hardware_name"),)
+    __table_args__: tuple = (PrimaryKeyConstraint("user_id", "hardware_name"),)
 
 
 class Audit(Base):

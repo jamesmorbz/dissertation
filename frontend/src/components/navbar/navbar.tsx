@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { CircleUser, Menu, HousePlug } from 'lucide-react';
 import { useAuth } from '@/helpers/auth-provider';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,8 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Notifications } from '@/components/navbar/notifications';
 
 const Navbar = () => {
+  const location = useLocation();
+
   const { logout } = useAuth();
   const links = [
     { to: '/dashboard', label: 'Dashboard' },
@@ -40,7 +42,11 @@ const Navbar = () => {
             <Link
               key={link.label}
               to={link.to}
-              className="text-muted-foreground transition-colors hover:text-foreground"
+              className={`transition-colors hover:text-foreground ${
+                location.pathname === link.to
+                  ? 'text-foreground font-semibold '
+                  : 'text-muted-foreground hover:underline'
+              }`}
             >
               {link.label}
             </Link>

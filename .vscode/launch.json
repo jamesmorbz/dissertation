@@ -45,6 +45,14 @@
             "program": "push_to_mqtt.py",
             "cwd": "${workspaceFolder}/mock-plug-data-pusher",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "MockDataBackfill",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "backfill.py",
+            "cwd": "${workspaceFolder}/backfill",
+            "console": "integratedTerminal"
         }
     ]
 }

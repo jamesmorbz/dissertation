@@ -14,8 +14,8 @@ class AutomationService {
     return apiClient.delete(`/controller/automation_rules/${ruleId}`);
   }
 
-  deactivateAutomationRule(ruleId: number) {
-    return apiClient.patch(`/controller/automation_rules/${ruleId}/deactivate`);
+  toggleAutomationRule(ruleId: number) {
+    return apiClient.patch(`/controller/automation_rules/${ruleId}/toggle`);
   }
 
   getAutomationRules() {

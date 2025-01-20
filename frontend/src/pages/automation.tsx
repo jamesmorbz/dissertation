@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { automationService } from '@/services/automation';
+import { deviceService } from '@/services/devices';
 import { Navbar } from '@/components/navbar/navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,534 +14,455 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Plus, Trash2, Save, Zap, Leaf, Clock, Power } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Clock, Ban, Zap, Leaf } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { DeviceWithRules, DeviceRule } from '@/types/device-rule';
+import { Device } from '@/types/device';
 
-const DAYS_OF_WEEK = [
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-  'Sunday',
-] as const;
+const DAYS_OF_WEEK = ['M', 'T', 'W', 'Th', 'F', 'S', 'Su'];
 
-const INITIAL_DEVICES: DeviceWithRules[] = [
-  {
-    device: {
-      hardware_name: 'tasmota_XXX000',
-      friendly_name: 'BedroomPlug1',
-      room: 'Bedroom',
-      tag: 'Charger',
-      power: true,
-      last_usage: 5,
-    },
-    rules: [
-      {
-        id: 1,
-        type: 'usage',
-        enabled: true,
-        threshold: 100,
-        action: 'turnOff',
-      },
-      {
-        id: 2,
-        type: 'schedule',
-        enabled: true,
-        time: '22:00',
-        days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-        action: 'turnOff',
-      },
-      {
-        id: 3,
-        type: 'energy_price',
-        enabled: true,
-        price_threshold: 0.15,
-        action: 'turnOn',
-      },
-      {
-        id: 4,
-        type: 'carbon_intensity',
-        enabled: true,
-        intensity_level: 'low',
-        action: 'turnOn',
-      },
-    ],
-  },
-  {
-    hardware_name: 'tasmota_XXX001',
-    friendly_name: 'KitchenPlug1',
-    tag: ['Kitchen', 'Appliance'],
-    status: 'ONLINE',
-    last_usage: '15W',
-    rules: [],
-  },
+const TRIGGER_TYPES = {
+  PRICE: 'PRICE',
+  CARBON: 'CARBON',
+  SCHEDULE: 'SCHEDULE',
+  USAGE: 'USAGE',
+} as const;
+
+const TRIGGER_LABELS = {
+  PRICE: 'Energy Price',
+  CARBON: 'Carbon Intensity',
+  SCHEDULE: 'Schedule',
+  USAGE: 'Energy Usage',
+};
+
+const ACTION_TYPES = {
+  POWER_OFF: 'POWER_OFF',
+  POWER_ON: 'POWER_ON',
+} as const;
+
+const PRICE_OPERATORS = [
+  { value: 'GT', label: 'Greater Than' },
+  { value: 'LT', label: 'Less Than' },
 ];
 
 const INITIAL_RULE = {
-  type: 'usage' as const,
-  threshold: '',
-  time: '',
-  days: [] as string[],
-  price_threshold: '',
-  intensity_level: 'low' as const,
-  action: 'turnOff' as const,
+  id: -1,
+  hardware_name: '',
+  action: 'POWER_OFF',
+  trigger_type: 'SCHEDULE',
+  value: '',
+  active: true,
+  selectedDays: [],
+  scheduleTime: '',
 };
 
-export function Automation() {
-  const [devices, setDevices] = useState<DeviceWithRules[]>(INITIAL_DEVICES);
-  const [selectedDevice, setSelectedDevice] = useState<string>(
-    devices[0]?.device.hardware_name,
-  );
-  const [newRule, setNewRule] = useState(INITIAL_RULE);
+type Rule = {
+  id: number;
+  hardware_name: string;
+  action: string;
+  trigger_type: string;
+  value: string;
+  active: boolean;
+  selectedDays: string[];
+  scheduleTime: string;
+};
+
+function Automation() {
+  const [rules, setRules] = useState<Rule[]>([]);
+  const [devices, setDevices] = useState<Device[]>([]);
+  const [newRule, setNewRule] = useState<Rule>(INITIAL_RULE);
   const { toast } = useToast();
 
-  const getRuleIcon = (type: DeviceRule['type']) => {
-    switch (type) {
-      case 'usage':
-        return <Power className="h-4 w-4" />;
-      case 'schedule':
-        return <Clock className="h-4 w-4" />;
-      case 'energy_price':
-        return <Zap className="h-4 w-4" />;
-      case 'carbon_intensity':
-        return <Leaf className="h-4 w-4" />;
+  useEffect(() => {
+    loadRules();
+    loadDevices();
+  }, []);
+
+  const loadRules = async () => {
+    try {
+      const response = await automationService.getAutomationRules();
+      setRules(response.data);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: `Failed to load automation rules. Error: ${error}`,
+        variant: 'destructive',
+      });
     }
   };
 
-  const addRule = () => {
-    setDevices(
-      devices.map((device) => {
-        if (device.hardware_name === selectedDevice) {
-          const newId = Math.max(0, ...device.rules.map((r) => r.id)) + 1;
-          return {
-            ...device,
-            rules: [...device.rules, { ...newRule, id: newId, enabled: true }],
-          };
-        }
-        return device;
-      }),
-    );
-    setNewRule(INITIAL_RULE);
-    toast({
-      title: 'Rule Added',
-      description: 'New automation rule has been created successfully.',
-    });
+  const loadDevices = async () => {
+    try {
+      const response = await deviceService.getDevices();
+      setDevices(response.data);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: `Failed to load devices. Error: ${error}`,
+        variant: 'destructive',
+      });
+    }
   };
 
-  const deleteRule = (deviceId: string, ruleId: number) => {
-    setDevices(
-      devices.map((device) => {
-        if (device.device.hardware_name === deviceId) {
-          return {
-            ...device,
-            rules: device.rules.filter((rule) => rule.id !== ruleId),
-          };
-        }
-        return device;
-      }),
-    );
-    toast({
-      title: 'Rule Deleted',
-      description: 'Automation rule has been removed.',
-      variant: 'destructive',
-    });
-  };
-
-  const toggleRule = (deviceId: string, ruleId: number) => {
-    setDevices(
-      devices.map((device) => {
-        if (device.device.hardware_name === deviceId) {
-          return {
-            ...device,
-            rules: device.rules.map((rule) => {
-              if (rule.id === ruleId) {
-                const newState = !rule.enabled;
-                toast({
-                  title: newState ? 'Rule Enabled' : 'Rule Disabled',
-                  description: `Automation rule has been ${
-                    newState ? 'enabled' : 'disabled'
-                  }.`,
-                });
-                return { ...rule, enabled: newState };
-              }
-              return rule;
-            }),
-          };
-        }
-        return device;
-      }),
-    );
-  };
-
-  interface RuleCardProps {
-    rule: DeviceRule;
-    deviceId: string;
-    showDevice?: boolean;
-  }
-
-  const RuleCard: React.FC<RuleCardProps> = ({
-    rule,
-    deviceId,
-    showDevice = false,
-  }) => {
-    const device = devices.find((d) => d.device.hardware_name === deviceId);
-    const getRuleContent = () => {
-      switch (rule.type) {
-        case 'usage':
-          return {
-            title: 'Usage Rule',
-            description: `Turn ${
-              rule.action === 'turnOff' ? 'off' : 'on'
-            } when usage exceeds ${rule.threshold}W`,
-          };
-        case 'schedule':
-          return {
-            title: 'Schedule Rule',
-            description: `Turn ${rule.action === 'turnOff' ? 'off' : 'on'} at ${
-              rule.time
-            } on ${rule.days?.join(', ')}`,
-          };
-        case 'energy_price':
-          return {
-            title: 'Energy Price Rule',
-            description: `Turn ${
-              rule.action === 'turnOff' ? 'off' : 'on'
-            } when price is below £${rule.price_threshold}/kWh`,
-          };
-        case 'carbon_intensity':
-          return {
-            title: 'Carbon Intensity Rule',
-            description: `Turn ${
-              rule.action === 'turnOff' ? 'off' : 'on'
-            } when grid carbon intensity is ${rule.intensity_level}`,
-          };
+  const formatValue = () => {
+    switch (newRule.trigger_type) {
+      case 'SCHEDULE':
+        return `${newRule.scheduleTime}${newRule.selectedDays.join('.')}`;
+      case 'PRICE': {
+        const [operator = 'GT', amount = ''] = newRule.value.split(',');
+        return amount ? `${operator},${amount}` : '';
       }
-    };
-
-    const { title, description } = getRuleContent();
-
-    return (
-      <Card className="mb-4">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-4">
-              <Switch
-                checked={rule.enabled}
-                onCheckedChange={() => toggleRule(deviceId, rule.id)}
-              />
-              <Label>{rule.enabled ? 'Enabled' : 'Disabled'}</Label>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => deleteRule(deviceId, rule.id)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-          {showDevice && (
-            <div className="mb-2 text-sm font-medium text-gray-500">
-              {device?.device.friendly_name || device?.device.hardware_name}
-            </div>
-          )}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              {getRuleIcon(rule.type)}
-              <h4 className="font-medium">{title}</h4>
-            </div>
-            <p className="text-sm text-gray-500">{description}</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
+      case 'USAGE': {
+        const amount = newRule.value;
+        return amount ? `GT,${amount},30` : '';
+      }
+      default:
+        return newRule.value;
+    }
   };
 
-  const allRules = devices.flatMap((device) =>
-    device.rules.map((rule) => ({
-      ...rule,
-      deviceId: device.device.hardware_name,
-    })),
-  );
+  const handleAddRule = async () => {
+    try {
+      const ruleToSubmit = {
+        ...newRule,
+        value: formatValue(),
+        action: newRule.trigger_type === 'USAGE' ? 'POWER_OFF' : newRule.action,
+      };
+      await automationService.createAutomationRule(ruleToSubmit);
+      toast({
+        title: 'Success',
+        description: 'Rule created successfully',
+      });
+      loadRules();
+      setNewRule(INITIAL_RULE);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: `Failed to create rule. Error: ${error}`,
+        variant: 'destructive',
+      });
+    }
+  };
 
-  const usageRules = allRules.filter((rule) => rule.type === 'usage');
-  const scheduleRules = allRules.filter((rule) => rule.type === 'schedule');
-  const energyRules = allRules.filter((rule) => rule.type === 'energy_price');
-  const carbonRules = allRules.filter(
-    (rule) => rule.type === 'carbon_intensity',
-  );
+  const handleToggleRule = async (ruleId: number, active: boolean) => {
+    try {
+      await automationService.toggleAutomationRule(ruleId);
+      toast({
+        title: 'Success',
+        description: `Rule ${active ? 'enabled' : 'disabled'} successfully`,
+      });
+      loadRules();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: `Failed to update rule. Error: ${error}`,
+        variant: 'destructive',
+      });
+    }
+  };
 
-  const AddRuleForm = () => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Rule Type</Label>
-          <Select
-            value={newRule.type}
-            onValueChange={(value: DeviceRule['type']) =>
-              setNewRule({
-                ...newRule,
-                type: value,
-                action: value === 'usage' ? 'turnOff' : 'turnOn',
-              })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="usage">Usage Threshold</SelectItem>
-              <SelectItem value="schedule">Schedule</SelectItem>
-              <SelectItem value="energy_price">Energy Price</SelectItem>
-              <SelectItem value="carbon_intensity">Carbon Intensity</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+  const getTriggerIcon = (type: string) => {
+    switch (type) {
+      case 'USAGE':
+        return <Zap className="h-4 w-4" />;
+      case 'SCHEDULE':
+        return <Clock className="h-4 w-4" />;
+      case 'PRICE':
+        return <Ban className="h-4 w-4" />;
+      case 'CARBON':
+        return <Leaf className="h-4 w-4" />;
+      default:
+        return null;
+    }
+  };
 
-        <div className="space-y-2">
-          <Label>Action</Label>
-          <Select
-            value={newRule.action}
-            onValueChange={(value: 'turnOn' | 'turnOff') =>
-              setNewRule({ ...newRule, action: value })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="turnOn">Turn On</SelectItem>
-              <SelectItem value="turnOff">Turn Off</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+  const toggleDay = (day: string) => {
+    const days = newRule.selectedDays.includes(day)
+      ? newRule.selectedDays.filter((d) => d !== day)
+      : [...newRule.selectedDays, day];
+    setNewRule({ ...newRule, selectedDays: days });
+  };
 
-        {newRule.type === 'usage' && (
-          <div className="space-y-2">
-            <Label>Usage Threshold (W)</Label>
-            <Input
-              type="number"
-              value={newRule.threshold}
-              onChange={(e) =>
-                setNewRule({
-                  ...newRule,
-                  threshold: parseFloat(e.target.value),
-                })
-              }
-              placeholder="Enter watts"
-            />
-          </div>
-        )}
-
-        {newRule.type === 'schedule' && (
-          <>
+  const getValueInput = () => {
+    switch (newRule.trigger_type) {
+      case 'SCHEDULE':
+        return (
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label>Time</Label>
               <Input
                 type="time"
-                value={newRule.time}
+                value={newRule.scheduleTime}
                 onChange={(e) =>
-                  setNewRule({ ...newRule, time: e.target.value })
+                  setNewRule({ ...newRule, scheduleTime: e.target.value })
                 }
               />
             </div>
-            <div className="col-span-2 space-y-2">
-              <Label>Days of Week</Label>
-              <div className="flex flex-wrap gap-2">
+            <div className="space-y-2">
+              <Label>Days</Label>
+              <div className="flex gap-2">
                 {DAYS_OF_WEEK.map((day) => (
                   <Button
                     key={day}
-                    variant={newRule.days.includes(day) ? 'default' : 'outline'}
-                    className="h-8"
-                    onClick={() => {
-                      const days = newRule.days.includes(day)
-                        ? newRule.days.filter((d) => d !== day)
-                        : [...newRule.days, day];
-                      setNewRule({ ...newRule, days });
-                    }}
+                    type="button"
+                    variant={
+                      newRule.selectedDays.includes(day) ? 'default' : 'outline'
+                    }
+                    className="w-8 h-8 p-0"
+                    onClick={() => toggleDay(day)}
                   >
-                    {day.slice(0, 3)}
+                    {day}
                   </Button>
                 ))}
               </div>
             </div>
-          </>
-        )}
-
-        {newRule.type === 'energy_price' && (
+          </div>
+        );
+      case 'PRICE': {
+        const [operator = 'GT', amount = ''] = newRule.value.split(',');
+        return (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Comparison</Label>
+              <Select
+                value={operator}
+                onValueChange={(newOperator) =>
+                  setNewRule({
+                    ...newRule,
+                    value: `${newOperator},${amount}`,
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PRICE_OPERATORS.map(({ value, label }) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Price Threshold (pence)</Label>
+              <Input
+                type="number"
+                value={amount}
+                onChange={(e) =>
+                  setNewRule({
+                    ...newRule,
+                    value: `${operator},${e.target.value}`,
+                  })
+                }
+                placeholder="Enter price in pence"
+              />
+            </div>
+          </div>
+        );
+      }
+      case 'USAGE':
+        return (
           <div className="space-y-2">
-            <Label>Price Threshold (£/kWh)</Label>
+            <Label>Usage Threshold (Wh)</Label>
             <Input
               type="number"
-              step="0.01"
-              value={newRule.price_threshold}
+              value={newRule.value}
               onChange={(e) =>
-                setNewRule({
-                  ...newRule,
-                  price_threshold: parseFloat(e.target.value),
-                })
+                setNewRule({ ...newRule, value: e.target.value })
               }
-              placeholder="Enter price per kWh"
+              placeholder="Enter Wh threshold"
             />
           </div>
-        )}
-
-        {newRule.type === 'carbon_intensity' && (
+        );
+      case 'CARBON':
+        return (
           <div className="space-y-2">
             <Label>Carbon Intensity Level</Label>
             <Select
-              value={newRule.intensity_level}
-              onValueChange={(value: DeviceRule['intensity_level']) =>
-                setNewRule({ ...newRule, intensity_level: value })
+              value={newRule.value}
+              onValueChange={(value) =>
+                setNewRule({ ...newRule, value: value })
               }
             >
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue placeholder="Select level" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="very_low">Very Low</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="moderate">Moderate</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="very_high">Very High</SelectItem>
+                <SelectItem value="VERY_LOW">Very Low</SelectItem>
+                <SelectItem value="LOW">Low</SelectItem>
+                <SelectItem value="MODERATE">Moderate</SelectItem>
+                <SelectItem value="HIGH">High</SelectItem>
+                <SelectItem value="VERY_HIGH">Very High</SelectItem>
               </SelectContent>
             </Select>
           </div>
-        )}
-      </div>
+        );
+      default:
+        return null;
+    }
+  };
 
-      <div className="flex justify-end">
-        <Button
-          onClick={addRule}
-          disabled={
-            (newRule.type === 'usage' && !newRule.threshold) ||
-            (newRule.type === 'schedule' &&
-              (!newRule.time || newRule.days.length === 0)) ||
-            (newRule.type === 'energy_price' && !newRule.price_threshold) ||
-            (newRule.type === 'carbon_intensity' && !newRule.intensity_level)
-          }
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Rule
-        </Button>
-      </div>
-    </div>
-  );
+  const getValueLabel = (rule: Rule) => {
+    switch (rule.trigger_type) {
+      case 'PRICE': {
+        const [operator, amount] = rule.value.split(',');
+        const operatorLabel = operator === 'GT' ? 'Greater Than' : 'Less Than';
+        return `${operatorLabel} ${amount}p`;
+      }
+      case 'CARBON':
+        return `Green Grid Intensity: ${rule.value.replace('_', ' ')}`;
+      case 'SCHEDULE': {
+        const time = rule.value.slice(0, 5);
+        const days = rule.value.slice(5);
+        return `At ${time} on ${days.split('.').join(', ')}`;
+      }
+      case 'USAGE': {
+        const [, amount, period] = rule.value.split(',');
+        return `Greater Than ${amount}Wh in ${period} mins`;
+      }
+      default:
+        return rule.value;
+    }
+  };
 
   return (
     <div className="flex min-h-screen w-full flex-col">
       <Navbar />
-      <div className="container mx-auto py-6">
-        <Tabs defaultValue="add" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Device Automation Rules</h2>
-            <TabsList>
-              <TabsTrigger value="add">Add Rule</TabsTrigger>
-              <TabsTrigger value="usage">Usage Rules</TabsTrigger>
-              <TabsTrigger value="schedule">Schedule Rules</TabsTrigger>
-              <TabsTrigger value="energy">Energy Price Rules</TabsTrigger>
-              <TabsTrigger value="carbon">Carbon Rules</TabsTrigger>
-            </TabsList>
-          </div>
+      <div className="container mx-auto py-6 space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Create New Automation Rule</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Device</Label>
+                <Select
+                  value={newRule.hardware_name}
+                  onValueChange={(value) =>
+                    setNewRule({ ...newRule, hardware_name: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select device" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {devices.map((device) => (
+                      <SelectItem
+                        key={device.hardware_name}
+                        value={device.hardware_name}
+                      >
+                        {device.friendly_name || device.hardware_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <TabsContent value="add">
-            <Card>
-              <CardHeader>
-                <CardTitle>Add New Rule</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <AddRuleForm />
+              <div className="space-y-2">
+                <Label>Trigger Type</Label>
+                <Select
+                  value={newRule.trigger_type}
+                  onValueChange={(value) =>
+                    setNewRule({
+                      ...newRule,
+                      trigger_type: value,
+                      value: value === 'PRICE' ? 'GT,' : '',
+                      selectedDays: [],
+                      scheduleTime: '',
+                      action: value === 'USAGE' ? 'POWER_OFF' : newRule.action,
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(TRIGGER_TYPES).map(([key, value]) => (
+                      <SelectItem key={key} value={value}>
+                        {TRIGGER_LABELS[key as keyof typeof TRIGGER_LABELS]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Action</Label>
+                <Select
+                  value={newRule.action}
+                  onValueChange={(value) =>
+                    setNewRule({ ...newRule, action: value })
+                  }
+                  disabled={newRule.trigger_type === 'USAGE'}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(ACTION_TYPES).map(([key, value]) => (
+                      <SelectItem key={key} value={value}>
+                        {key.replace('_', ' ')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">{getValueInput()}</div>
+            </div>
+
+            <div className="mt-4 flex justify-end">
+              <Button
+                onClick={handleAddRule}
+                disabled={
+                  !newRule.hardware_name ||
+                  (newRule.trigger_type === 'SCHEDULE'
+                    ? !newRule.scheduleTime || newRule.selectedDays.length === 0
+                    : !newRule.value)
+                }
+              >
+                Create Rule
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {rules.map((rule) => (
+            <Card key={rule.id}>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-4">
+                    <Switch
+                      checked={rule.active}
+                      onCheckedChange={(checked) =>
+                        handleToggleRule(rule.id, checked)
+                      }
+                    />
+                    <Label>{rule.active ? 'Enabled' : 'Disabled'}</Label>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    {getTriggerIcon(rule.trigger_type)}
+                    <h4 className="font-medium">{rule.hardware_name}</h4>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    {rule.action === 'POWER_OFF' ? 'Turn Off' : 'Turn On'} when{' '}
+                    {getValueLabel(rule)}
+                  </p>
+                </div>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="usage">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {usageRules.map((rule) => (
-                <RuleCard
-                  key={`${rule.deviceId}-${rule.id}`}
-                  rule={rule}
-                  deviceId={rule.deviceId}
-                  showDevice={true}
-                />
-              ))}
-              {usageRules.length === 0 && (
-                <Card className="col-span-full p-6">
-                  <p className="text-center text-gray-500">
-                    No usage rules configured
-                  </p>
-                </Card>
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="schedule">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {scheduleRules.map((rule) => (
-                <RuleCard
-                  key={`${rule.deviceId}-${rule.id}`}
-                  rule={rule}
-                  deviceId={rule.deviceId}
-                  showDevice={true}
-                />
-              ))}
-              {scheduleRules.length === 0 && (
-                <Card className="col-span-full p-6">
-                  <p className="text-center text-gray-500">
-                    No schedule rules configured
-                  </p>
-                </Card>
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="energy">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {energyRules.map((rule) => (
-                <RuleCard
-                  key={`${rule.deviceId}-${rule.id}`}
-                  rule={rule}
-                  deviceId={rule.deviceId}
-                  showDevice={true}
-                />
-              ))}
-              {energyRules.length === 0 && (
-                <Card className="col-span-full p-6">
-                  <p className="text-center text-gray-500">
-                    No energy price rules configured
-                  </p>
-                </Card>
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="carbon">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {carbonRules.map((rule) => (
-                <RuleCard
-                  key={`${rule.deviceId}-${rule.id}`}
-                  rule={rule}
-                  deviceId={rule.deviceId}
-                  showDevice={true}
-                />
-              ))}
-              {carbonRules.length === 0 && (
-                <Card className="col-span-full p-6">
-                  <p className="text-center text-gray-500">
-                    No carbon intensity rules configured
-                  </p>
-                </Card>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
+          ))}
+        </div>
       </div>
       <Toaster />
     </div>
   );
 }
+
+export { Automation };
