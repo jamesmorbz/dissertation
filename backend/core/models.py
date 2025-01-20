@@ -72,7 +72,7 @@ class DeviceMapping(Base):
         TIMESTAMP, nullable=False, default=func.now(), onupdate=func.now()
     )
 
-    __table_args__ = PrimaryKeyConstraint("user_id", "hardware_name")
+    __table_args__ = (PrimaryKeyConstraint("user_id", "hardware_name"),)
 
 
 class Audit(Base):
@@ -100,7 +100,7 @@ class AutomationRule(Base):
     active = Column(Boolean, nullable=False, default=True)
     action = Column(String(32), nullable=False)
     trigger_type = Column(String(32), nullable=False)
-    value = Column(String(16), nullable=False)
+    value = Column(String(32), nullable=False)
     created_at = Column(TIMESTAMP, nullable=False, default=func.now())
     updated_at = Column(
         TIMESTAMP, nullable=False, default=func.now(), onupdate=func.now()
@@ -305,7 +305,7 @@ def track_automation_rule_creation(mapper, connection, target: AutomationRule):
             target.user_id,
             f"Automation Rule for '{target.hardware_name}' was created",
             details=f"Attributes - Action: {target.action}, Trigger Type: {target.trigger_type}, "
-            f"Value: {target.value}, Active: {target.active}",
+            f"Value: {target.value}",
             device=target.hardware_name,
             action_type="AUTOMATION_RULE_ADD",
         )
