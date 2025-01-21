@@ -22,8 +22,8 @@ class PostgresSettings(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
     POSTGRES_HOST: str
-    POSTGRES_PORT: bool
-    POSTGRES_DB: bool
+    POSTGRES_PORT: str
+    POSTGRES_DB: str
 
 
 def load_influx_config() -> InfluxSettings:
