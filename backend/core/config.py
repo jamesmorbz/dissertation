@@ -18,6 +18,14 @@ class FastAPISettings(BaseSettings):
     debug: bool
 
 
+class PostgresSettings(BaseSettings):
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_HOST: str
+    POSTGRES_PORT: bool
+    POSTGRES_DB: bool
+
+
 def load_influx_config() -> InfluxSettings:
     with open("config/influx_config.yaml", "r") as file:
         config_data = yaml.safe_load(file)
@@ -30,6 +38,12 @@ def load_fastapi_config() -> FastAPISettings:
     return FastAPISettings(**config_data)
 
 
+def load_postgres_config() -> PostgresSettings:
+    with open("config/postgres_config.yaml", "r") as file:
+        config_data = yaml.safe_load(file)
+    return PostgresSettings(**config_data)
+
+
 def load_tags_config():
     with open("config/tags_metadata.yaml", "r") as file:
         config_data = yaml.safe_load(file)
@@ -38,4 +52,5 @@ def load_tags_config():
 
 influx_settings = load_influx_config()
 fastapi_settings = load_fastapi_config()
+postgres_settings = load_postgres_config()
 tags_metadata = load_tags_config()

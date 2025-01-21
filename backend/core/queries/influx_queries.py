@@ -11,9 +11,9 @@ class InfluxDBQueries:
     @staticmethod
     def get_device_status_query():
         return """
-        from(bucket: "metrics")
+        from(bucket: "usage")
             |> range(start: -6h)
-            |> filter(fn: (r) => r["_measurement"] == "fluentbit.status")
+            |> filter(fn: (r) => r["_measurement"] == "status")
             |> filter(fn: (r) => r["_field"] == "power" or r["_field"] == "uptime" or r["_field"] == "wifi_rssi" or r["_field"] == "wifi_signal")
             |> last()
         """
@@ -21,9 +21,9 @@ class InfluxDBQueries:
     @staticmethod
     def get_last_usage_query():
         return """
-        from(bucket: "metrics")
+        from(bucket: "usage")
             |> range(start: -6h)
-            |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
+            |> filter(fn: (r) => r["_measurement"] == "power")
             |> filter(fn: (r) => r["_field"] == "power")
             |> map(fn: (r) => ({r with _unix: uint(v: r._time) }))
             |> last()
@@ -32,9 +32,9 @@ class InfluxDBQueries:
     @staticmethod
     def get_row_count_per_device_query():
         return """
-        from(bucket: "metrics")
+        from(bucket: "usage")
             |> range(start: -24h)
-            |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
+            |> filter(fn: (r) => r["_measurement"] == "power")
             |> filter(fn: (r) => r["_field"] == "power")
             |> window(every: 1h)
             |> group(columns: ["hardware_name", "_start"])
@@ -46,9 +46,9 @@ class InfluxDBQueries:
         lookback: str, device_id: str, interval: str, aggregation: str
     ):  # TODO: Stricter type hints on input to InfluxQuery
         return f"""
-        from(bucket: "metrics")
+        from(bucket: "usage")
             |> range(start: -{lookback})
-            |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
+            |> filter(fn: (r) => r["_measurement"] == "power")
             |> filter(fn: (r) => r["_field"] == "power")
             |> filter(fn: (r) => r["hardware_name"] == "{device_id}")
             |> aggregateWindow(every: {interval}, fn: {aggregation}, createEmpty: true)
@@ -63,13 +63,13 @@ class InfluxDBQueries:
                 tables: [
                     from(bucket: "1d-aggregated")
                         |> range(start: -14d, stop: -7d) 
-                        |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
+                        |> filter(fn: (r) => r["_measurement"] == "power")
                         |> filter(fn: (r) => r["_field"] == "power")
                         |> group()
                         |> sum(),
                     from(bucket: "1d-aggregated")
                         |> range(start: -7d, stop: now()) 
-                        |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
+                        |> filter(fn: (r) => r["_measurement"] == "power")
                         |> filter(fn: (r) => r["_field"] == "power")
                         |> group()
                         |> sum(),
@@ -82,7 +82,7 @@ class InfluxDBQueries:
         return """
             from(bucket: "1d-aggregated")
             |> range(start: -30d)
-            |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
+            |> filter(fn: (r) => r["_measurement"] == "power")
             |> filter(fn: (r) => r["_field"] == "power")
         """
 
@@ -92,7 +92,7 @@ class InfluxDBQueries:
             return f"""
                 from(bucket: "1d-aggregated")
                 |> range(start: -{lookback_days}d)
-                |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
+                |> filter(fn: (r) => r["_measurement"] == "power")
                 |> filter(fn: (r) => r["_field"] == "power")
                 |> aggregateWindow(every: 1d, fn: sum, createEmpty: true)
                 |> map(fn: (r) => ({{ r with _unix: uint(v: r._time) }}))
@@ -101,7 +101,7 @@ class InfluxDBQueries:
             return f"""
                 from(bucket: "1d-aggregated")
                 |> range(start: -{lookback_days}d)
-                |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage")
+                |> filter(fn: (r) => r["_measurement"] == "power")
                 |> filter(fn: (r) => r["_field"] == "power")
                 |> filter(fn: (r) => r["hardware_name"] == "{device_id}")
                 |> aggregateWindow(every: 1d, fn: sum, createEmpty: true)

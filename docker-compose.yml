@@ -65,22 +65,22 @@ services:
       timeout: 10s
       retries: 5
 
-  # postgres:
-  #   image: postgres:17.0
-  #   restart: always
-  #   ports:
-  #     - "5432:5432"
-  #   environment:
-  #     - POSTGRES_USER=admin
-  #     - POSTGRES_PASSWORD=mypassword
-  #     - POSTGRES_DB=admin
-  #   volumes:
-  #     - ./diss-docker/postgres:/var/lib/postgresql/data
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U admin -d admin"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 5
+  postgres:
+    image: postgres:17.0
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=diss
+    volumes:
+      - ./diss-docker/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d diss"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   backend:
     build: ./backend
@@ -89,15 +89,15 @@ services:
       - "8000:8000"
     depends_on:
       - influxdb
-      - postgres
+      # - postgres
 
-  frontend:
-    build: ./frontend
-    restart: always
-    ports:
-      - "5000:5000"
-    depends_on:
-      - backend
+  # frontend:
+  #   build: ./frontend
+  #   restart: always
+  #   ports:
+  #     - "5000:5000"
+  #   depends_on:
+  #     - backend
 
 volumes:
   influxdb-data:  # Named volume for InfluxDB data

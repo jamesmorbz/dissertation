@@ -10,8 +10,8 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 INTERVAL_SECONDS = 10
 PROCESS_START_TIME = time.time()
 
-START_DATE = datetime.strptime("12-01-2025", "%d-%m-%Y")
-END_DATE = datetime.strptime("19-01-2025", "%d-%m-%Y")
+END_DATE = datetime.strptime("21-01-2025", "%d-%m-%Y")
+START_DATE = datetime.strptime("01-01-2025", "%d-%m-%Y")
 
 logging.basicConfig(
     format="%(asctime)s %(message)s",
@@ -25,17 +25,17 @@ def gen_rand_float(low, high):
     return round(random.uniform(low, high), 2)
 
 def write_to_influx(write_api, hardware_name, power, voltage, current, timestamp: datetime):
-    point = Point("fluentbit.wattage") \
+    point = Point("power") \
         .tag("hardware_name", hardware_name) \
         .tag("source_topic", f"tele/{hardware_name}/SENSOR") \
         .field("power", float(power)) \
         .field("voltage", float(voltage)) \
         .field("current", float(current)) \
         .time(timestamp)
-    write_api.write(bucket="metrics", record=point)
+    write_api.write(bucket="usage", record=point)
 
 def write_status_to_influx(write_api, hardware_name, network_name, timestamp, uptime):
-    status_point = Point("fluentbit.status") \
+    status_point = Point("status") \
         .tag("hardware_name", hardware_name) \
         .tag("source_topic", f"tele/{hardware_name}/STATE") \
         .tag("wifi_name", network_name) \
@@ -44,7 +44,7 @@ def write_status_to_influx(write_api, hardware_name, network_name, timestamp, up
         .field("signal", random.randint(-100, 0)) \
         .field("power", True) \
         .time(timestamp)
-    write_api.write(bucket="metrics", record=status_point)
+    write_api.write(bucket="usage", record=status_point)
 
 def get_usage(mock_plug, usage_config):
     configured_usage = mock_plug["usage"]
@@ -112,7 +112,7 @@ def process_hourly_window(query_api, start_time, end_time):
     query = f'''
         from(bucket: "metrics")
             |> range(start: {start_time.strftime("%Y-%m-%dT%H:%M:%SZ")}, stop: {end_time.strftime("%Y-%m-%dT%H:%M:%SZ")})
-            |> filter(fn: (r) => r["_measurement"] == "fluentbit.wattage" and r["_field"] == "power")
+            |> filter(fn: (r) => r["_measurement"] == "power" and r["_field"] == "power")
             |> elapsed()
             |> map(fn: (r) => ({{r with *value: r.*value * (float(v: r.elapsed) / 3600.0)}}))
             |> sum()
@@ -214,7 +214,7 @@ def main():
         
         # Initialize InfluxDB client
         client = InfluxDBClient(
-            url="http://localhost:8086",
+            url="http://influx:8086",
             token="my-secret-token",
             org="diss",
             debug=False

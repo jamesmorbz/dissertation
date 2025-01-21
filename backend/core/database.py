@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import QueuePool
 import logging
-from core.config import influx_settings
+from core.config import influx_settings, postgres_settings
 
 logging.basicConfig(
     level=logging.INFO,
@@ -14,15 +14,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-SQLITE_DB_PATH = "sqlite3.db"
-SQLALCHEMY_DATABASE_URL = f"sqlite:///./{SQLITE_DB_PATH}"
+SQLALCHEMY_DATABASE_URL = f"postgresql://{postgres_settings.POSTGRES_USER}:{postgres_settings.POSTGRES_PASSWORD}@{postgres_settings.POSTGRES_HOST}:{postgres_settings.POSTGRES_PORT}/{postgres_settings.POSTGRES_DB}"
 
 
 class DatabaseManager:
     def __init__(self):
         self.engine = create_engine(
             SQLALCHEMY_DATABASE_URL,
-            connect_args={"check_same_thread": False},
             poolclass=QueuePool,
             pool_size=10,
             max_overflow=20,
@@ -33,7 +31,6 @@ class DatabaseManager:
         self.SessionFactory = sessionmaker(
             autocommit=False, autoflush=False, bind=self.engine, expire_on_commit=False
         )
-
         self.influx_client = InfluxDBClient(
             url=influx_settings.url,
             token=influx_settings.token,
