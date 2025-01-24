@@ -40,7 +40,7 @@ class DeviceStatus(BaseModel):
     room: Optional[str]
     tag: Optional[str]
     friendly_name: Optional[str]
-    power: bool
+    state: bool
     uptime: int
     wifi_rssi: int
     wifi_signal: int

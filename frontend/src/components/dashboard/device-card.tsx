@@ -11,13 +11,13 @@ interface DeviceCardProps {
 
 const DeviceCard: React.FC<DeviceCardProps> = ({ devices }) => {
   const onlineDevicesCount = devices.filter(
-    (device) => device.power === true && device.last_usage !== 0,
+    (device) => device.state === true && device.last_usage !== 0,
   ).length;
   const idleDevicesCount = devices.filter(
-    (device) => device.power === false || device.last_usage === 0,
+    (device) => device.state === false || device.last_usage === 0,
   ).length;
   const offlineDevicesCount = devices.filter(
-    (device) => device.power === null,
+    (device) => device.state === null,
   ).length;
 
   const top5Devices: Array<Device> = devices
@@ -40,9 +40,9 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ devices }) => {
       <CardContent className="grid gap-4">
         {top5Devices.map((device) => (
           <div className="flex items-center gap-4" key={device.hardware_name}>
-            {device.power === true ? (
+            {device.state === true ? (
               <CircleCheck className="text-green-500" />
-            ) : device.power === false ? (
+            ) : device.state === false ? (
               <MinusCircle className="text-yellow-500" />
             ) : (
               <AlertCircle className="text-red-500" />

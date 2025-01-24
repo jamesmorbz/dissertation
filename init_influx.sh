@@ -16,7 +16,7 @@ option task = {
 
 from(bucket: "usage")
     |> range(start: -1d)
-    |> filter(fn: (r) => r["_measurement"] == "status" and r["_field"] == "power")
+    |> filter(fn: (r) => r["_measurement"] == "status" and r["_field"] == "state")
     |> distinct(column: "hardware_name")
     |> keep(columns: ["_value", "_stop", "hardware_name"])
     |> set(key: "_field", value: "hardware_name")
@@ -35,7 +35,7 @@ option task = {
 
 from(bucket: "usage")
     |> range(start: -1h)
-    |> filter(fn: (r) => r["_measurement"] == "power" and r["_field"] == "power")
+    |> filter(fn: (r) => r["_measurement"] == "power" and r["_field"] == "wattage")
     |> elapsed()
     |> map(fn: (r) => ({r with _value: r._value * (float(v: r.elapsed) / 3600.0)}))
     |> sum()

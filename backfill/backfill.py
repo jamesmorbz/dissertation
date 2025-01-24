@@ -10,8 +10,8 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 INTERVAL_SECONDS = 10
 PROCESS_START_TIME = time.time()
 
-END_DATE = datetime.strptime("21-01-2025", "%d-%m-%Y")
-START_DATE = datetime.strptime("01-01-2025", "%d-%m-%Y")
+END_DATE = datetime.now()
+START_DATE = END_DATE - timedelta(days=30)
 
 logging.basicConfig(
     format="%(asctime)s %(message)s",
@@ -27,8 +27,9 @@ def gen_rand_float(low, high):
 def write_to_influx(write_api, hardware_name, power, voltage, current, timestamp: datetime):
     point = Point("power") \
         .tag("hardware_name", hardware_name) \
-        .tag("source_topic", f"tele/{hardware_name}/SENSOR") \
-        .field("power", float(power)) \
+        .tag("topic", f"tele/{hardware_name}/SENSOR") \
+        .tag("host", "backfill") \
+        .field("wattage", float(power)) \
         .field("voltage", float(voltage)) \
         .field("current", float(current)) \
         .time(timestamp)
@@ -37,12 +38,13 @@ def write_to_influx(write_api, hardware_name, power, voltage, current, timestamp
 def write_status_to_influx(write_api, hardware_name, network_name, timestamp, uptime):
     status_point = Point("status") \
         .tag("hardware_name", hardware_name) \
-        .tag("source_topic", f"tele/{hardware_name}/STATE") \
+        .tag("topic", f"tele/{hardware_name}/STATE") \
+        .tag("host", "backfill") \
         .tag("wifi_name", network_name) \
         .field("uptime", int(uptime)) \
         .field("rssi", random.randint(0, 100)) \
         .field("signal", random.randint(-100, 0)) \
-        .field("power", True) \
+        .field("state", True) \
         .time(timestamp)
     write_api.write(bucket="usage", record=status_point)
 
@@ -81,7 +83,6 @@ def get_usage(mock_plug, usage_config):
 def generate_time_windows(interval='1h', start_date=None, end_date=None):
     """Generate start and end times for each interval between start_date and end_date"""
     if interval == '1h':
-        # Align to hours
         start_time = start_date.replace(minute=0, second=0, microsecond=0)
         end_time = end_date.replace(minute=0, second=0, microsecond=0)
         
@@ -93,7 +94,6 @@ def generate_time_windows(interval='1h', start_date=None, end_date=None):
             windows.append((window_start, window_end))
             current_time = window_start
     else:  # '1d'
-        # Align to days
         start_time = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
         end_time = end_date.replace(hour=0, minute=0, second=0, microsecond=0)
         
@@ -110,11 +110,11 @@ def generate_time_windows(interval='1h', start_date=None, end_date=None):
 def process_hourly_window(query_api, start_time, end_time):
     """Process a single hourly window"""
     query = f'''
-        from(bucket: "metrics")
+        from(bucket: "usage")
             |> range(start: {start_time.strftime("%Y-%m-%dT%H:%M:%SZ")}, stop: {end_time.strftime("%Y-%m-%dT%H:%M:%SZ")})
-            |> filter(fn: (r) => r["_measurement"] == "power" and r["_field"] == "power")
+            |> filter(fn: (r) => r["_measurement"] == "power" and r["_field"] == "wattage")
             |> elapsed()
-            |> map(fn: (r) => ({{r with *value: r.*value * (float(v: r.elapsed) / 3600.0)}}))
+            |> map(fn: (r) => ({{r with _value: r._value * (float(v: r.elapsed) / 3600.0)}}))
             |> sum()
             |> to(bucket: "1h-aggregated", timeColumn: "_stop")
     '''
@@ -204,27 +204,22 @@ def process_aggregations(client, start_date, end_date):
 
 def main():
     try:
-        # Validate dates
         if END_DATE <= START_DATE:
             logging.error("End date must be after start date")
             return
 
-        # Load configuration
         config = yaml.safe_load(open("config.yaml"))
         
-        # Initialize InfluxDB client
         client = InfluxDBClient(
-            url="http://influx:8086",
+            url="http://influxdb:8086",
             token="my-secret-token",
             org="diss",
             debug=False
         )
         
-        # Generate historical data
         push_historical_data(client, config, START_DATE, END_DATE)
         logging.info("Historical data generation complete!")
         
-        # Process aggregations
         process_aggregations(client, START_DATE, END_DATE)
         logging.info("Data aggregation complete!")
         

@@ -77,16 +77,16 @@ export function Devices() {
     );
     setDevices(
       devices.map((d) =>
-        d.hardware_name === hardware_name ? { ...d, power: !d.power } : d,
+        d.hardware_name === hardware_name ? { ...d, state: !d.state } : d,
       ),
     );
 
     toast({
-      title: !device?.power ? 'Device Powered On' : 'Device Powered Off',
+      title: !device?.state ? 'Device Powered On' : 'Device Powered Off',
       description: `${
         device?.friendly_name || device?.hardware_name
-      } has been ${!device?.power ? 'turned on' : 'turned off'}.`,
-      variant: !device?.power ? 'default' : 'destructive',
+      } has been ${!device?.state ? 'turned on' : 'turned off'}.`,
+      variant: !device?.state ? 'default' : 'destructive',
     });
   };
 

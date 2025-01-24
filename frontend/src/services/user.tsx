@@ -9,6 +9,10 @@ class UserService {
   verifyToken() {
     return apiClient.get('/user/verify-token');
   }
+
+  login(body: URLSearchParams) {
+    return apiClient.post('/user/login', body);
+  }
 }
 
 export const userService = new UserService();

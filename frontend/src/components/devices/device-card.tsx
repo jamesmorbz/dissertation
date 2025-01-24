@@ -25,7 +25,7 @@ interface DeviceCardProps {
   friendly_name: string | null;
   room: string | null;
   tag: string | null;
-  power: boolean | null;
+  state: boolean | null;
   last_usage: number;
   onPowerToggle: () => void;
   onUpdate: (updates: {
@@ -47,7 +47,7 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
   friendly_name,
   room,
   tag,
-  power,
+  state,
   last_usage,
   onPowerToggle,
   onUpdate,
@@ -151,9 +151,9 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
             </Button>
             <Button
               variant={
-                power === true
+                state === true
                   ? 'default'
-                  : power === false
+                  : state === false
                     ? 'secondary'
                     : 'destructive'
               }
@@ -173,16 +173,16 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
               <div className="flex items-center justify-between">
                 <Badge
                   variant={
-                    power === true
+                    state === true
                       ? 'default'
-                      : power === false
+                      : state === false
                         ? 'secondary'
                         : 'destructive'
                   }
                 >
-                  {power === true
+                  {state === true
                     ? 'ONLINE'
-                    : power === false
+                    : state === false
                       ? 'IDLE'
                       : 'OFFLINE'}
                 </Badge>
@@ -214,16 +214,16 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
                   <div className="flex items-center justify-between mt-4">
                     <Badge
                       variant={
-                        power === true
+                        state === true
                           ? 'default'
-                          : power === false
+                          : state === false
                             ? 'secondary'
                             : 'destructive'
                       }
                     >
-                      {power === true
+                      {state === true
                         ? 'ONLINE'
-                        : power === false
+                        : state === false
                           ? 'IDLE'
                           : 'OFFLINE'}
                     </Badge>

@@ -2,7 +2,7 @@ class InfluxDBQueries:
     @staticmethod
     def get_distinct_devices_query():
         return """
-        from(bucket: "distinct_devices")
+        from(bucket: "devices")
             |> range(start: -90d)
             |> keep(columns: ["hardware_name"])
             |> distinct(column: "hardware_name")
@@ -12,9 +12,9 @@ class InfluxDBQueries:
     def get_device_status_query():
         return """
         from(bucket: "usage")
-            |> range(start: -6h)
+            |> range(start: -30d)
             |> filter(fn: (r) => r["_measurement"] == "status")
-            |> filter(fn: (r) => r["_field"] == "power" or r["_field"] == "uptime" or r["_field"] == "wifi_rssi" or r["_field"] == "wifi_signal")
+            |> filter(fn: (r) => r["_field"] == "state" or r["_field"] == "uptime" or r["_field"] == "wifi_rssi" or r["_field"] == "wifi_signal")
             |> last()
         """
 
@@ -22,9 +22,9 @@ class InfluxDBQueries:
     def get_last_usage_query():
         return """
         from(bucket: "usage")
-            |> range(start: -6h)
+            |> range(start: -30d)
             |> filter(fn: (r) => r["_measurement"] == "power")
-            |> filter(fn: (r) => r["_field"] == "power")
+            |> filter(fn: (r) => r["_field"] == "wattage")
             |> map(fn: (r) => ({r with _unix: uint(v: r._time) }))
             |> last()
         """
@@ -35,7 +35,7 @@ class InfluxDBQueries:
         from(bucket: "usage")
             |> range(start: -24h)
             |> filter(fn: (r) => r["_measurement"] == "power")
-            |> filter(fn: (r) => r["_field"] == "power")
+            |> filter(fn: (r) => r["_field"] == "wattage")
             |> window(every: 1h)
             |> group(columns: ["hardware_name", "_start"])
             |> count()
@@ -49,7 +49,7 @@ class InfluxDBQueries:
         from(bucket: "usage")
             |> range(start: -{lookback})
             |> filter(fn: (r) => r["_measurement"] == "power")
-            |> filter(fn: (r) => r["_field"] == "power")
+            |> filter(fn: (r) => r["_field"] == "wattage")
             |> filter(fn: (r) => r["hardware_name"] == "{device_id}")
             |> aggregateWindow(every: {interval}, fn: {aggregation}, createEmpty: true)
             |> map(fn: (r) => ({{ r with _unix: uint(v: r._time) }}))
@@ -64,13 +64,13 @@ class InfluxDBQueries:
                     from(bucket: "1d-aggregated")
                         |> range(start: -14d, stop: -7d) 
                         |> filter(fn: (r) => r["_measurement"] == "power")
-                        |> filter(fn: (r) => r["_field"] == "power")
+                        |> filter(fn: (r) => r["_field"] == "wattage")
                         |> group()
                         |> sum(),
                     from(bucket: "1d-aggregated")
                         |> range(start: -7d, stop: now()) 
                         |> filter(fn: (r) => r["_measurement"] == "power")
-                        |> filter(fn: (r) => r["_field"] == "power")
+                        |> filter(fn: (r) => r["_field"] == "wattage")
                         |> group()
                         |> sum(),
                 ]
@@ -83,7 +83,7 @@ class InfluxDBQueries:
             from(bucket: "1d-aggregated")
             |> range(start: -30d)
             |> filter(fn: (r) => r["_measurement"] == "power")
-            |> filter(fn: (r) => r["_field"] == "power")
+            |> filter(fn: (r) => r["_field"] == "wattage")
         """
 
     @staticmethod
@@ -93,7 +93,7 @@ class InfluxDBQueries:
                 from(bucket: "1d-aggregated")
                 |> range(start: -{lookback_days}d)
                 |> filter(fn: (r) => r["_measurement"] == "power")
-                |> filter(fn: (r) => r["_field"] == "power")
+                |> filter(fn: (r) => r["_field"] == "wattage")
                 |> aggregateWindow(every: 1d, fn: sum, createEmpty: true)
                 |> map(fn: (r) => ({{ r with _unix: uint(v: r._time) }}))
             """
@@ -102,7 +102,7 @@ class InfluxDBQueries:
                 from(bucket: "1d-aggregated")
                 |> range(start: -{lookback_days}d)
                 |> filter(fn: (r) => r["_measurement"] == "power")
-                |> filter(fn: (r) => r["_field"] == "power")
+                |> filter(fn: (r) => r["_field"] == "wattage")
                 |> filter(fn: (r) => r["hardware_name"] == "{device_id}")
                 |> aggregateWindow(every: 1d, fn: sum, createEmpty: true)
                 |> map(fn: (r) => ({{ r with _unix: uint(v: r._time) }}))

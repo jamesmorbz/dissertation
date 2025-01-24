@@ -13,7 +13,7 @@ export function Analytics() {
       friendly_name: 'Living Room Plug',
       room: 'Living Room',
       tag: 'SmartPlug',
-      power: true,
+      state: true,
       last_usage: 1623481200000, // Timestamp example
       uptime: 1209600, // Seconds (14 days)
       wifi_rssi: -45, // dBm
@@ -25,7 +25,7 @@ export function Analytics() {
       friendly_name: 'Bedroom Light',
       room: 'Bedroom',
       tag: 'SmartLight',
-      power: false,
+      state: false,
       last_usage: 1623577600000, // Timestamp example
       uptime: 864000, // Seconds (10 days)
       wifi_rssi: -55, // dBm

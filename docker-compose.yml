@@ -1,9 +1,10 @@
 services:
-  # backfill:
-  #   build: ./backfill
-  #   restart: always
-  #   depends_on:
-  #     - fluentbit
+  backfill:
+    build: ./backfill
+    depends_on:
+      influxdb:
+        condition: service_healthy
+      
 
   # plug-wizard:
   #   build: ./plug-wizard
@@ -54,8 +55,9 @@ services:
       - DOCKER_INFLUXDB_INIT_USERNAME=admin
       - DOCKER_INFLUXDB_INIT_PASSWORD=admin123
       - DOCKER_INFLUXDB_INIT_ORG=diss
-      - DOCKER_INFLUXDB_INIT_BUCKET=metrics
+      - DOCKER_INFLUXDB_INIT_BUCKET=admin
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-secret-token
+      - DOCKER_INFLUXDB_INIT_CLI_CONFIG_NAME=$${shell openssl rand -base64 12}
     volumes:
       - ./diss-docker/influxdb:/var/lib/influxdb2
       - ./init_influx.sh:/docker-entrypoint-initdb.d/init_influx.sh
@@ -88,8 +90,10 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - influxdb
-      # - postgres
+      influxdb:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
 
   # frontend:
   #   build: ./frontend
@@ -98,10 +102,3 @@ services:
   #     - "5000:5000"
   #   depends_on:
   #     - backend
-
-volumes:
-  influxdb-data:  # Named volume for InfluxDB data
-  postgres-data:  # Named volume for Postgres data
-  fluentbit-log:  # Named volume for Fluentd logs
-  mosquitto-data: # Named volume for Mosquitto data
-  mosquitto-log:  # Named volume for Mosquitto logs

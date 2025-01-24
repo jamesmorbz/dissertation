@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from '@/components/navbar/navbar';
+import { userService } from '@/services/user';
 
 export function Login() {
   const [username, setUsername] = useState('');
@@ -35,25 +36,18 @@ export function Login() {
     const formDetails = new URLSearchParams();
     formDetails.append('username', username);
     formDetails.append('password', password);
-    localStorage.setItem('token', 'Fudged');
 
     try {
-      const response = await fetch('http://localhost:8000/user/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formDetails,
-      });
+      const response = await userService.login(formDetails);
 
       setLoading(false);
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response.status < 300) {
+        const data = await response.data;
         localStorage.setItem('token', data.access_token);
         navigate('/dashboard');
       } else {
-        const errorData = await response.json();
+        const errorData = await response.data;
         setError(errorData.detail || 'Authentication failed!');
       }
     } catch (error) {

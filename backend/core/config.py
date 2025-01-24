@@ -6,7 +6,6 @@ class InfluxSettings(BaseSettings):
     url: str
     token: str
     org: str
-    bucket: str
     debug: bool
 
 
