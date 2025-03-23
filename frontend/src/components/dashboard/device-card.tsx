@@ -55,7 +55,7 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ devices }) => {
                 {device.tag || 'N/A'} ({device.room})
               </p>
             </div>
-            <div className="ml-auto font-medium">{device.last_usage}</div>
+            <div className="ml-auto font-medium">{device.last_usage} W</div>
           </div>
         ))}
       </CardContent>

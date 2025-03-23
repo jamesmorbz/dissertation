@@ -1,5 +1,6 @@
 import './App.css';
 import { Login } from '@/pages/login';
+import { Signup } from '@/pages/sign-up';
 import { Dashboard } from '@/pages/dashboard';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { SplashScreen } from '@/pages/home';
@@ -27,7 +28,7 @@ export default function App() {
               {/* Public Routes */}
               <Route path="/" element={<SplashScreen />} />
               <Route path="/faqs" element={<FAQs />} />
-              <Route path="/sign-up" element={<Login />} />
+              <Route path="/sign-up" element={<Signup />} />
               <Route path="/login" element={<Login />} />
 
               {/* Protected Routes */}

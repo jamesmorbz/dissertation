@@ -1,9 +1,9 @@
 services:
-  backfill:
-    build: ./backfill
-    depends_on:
-      influxdb:
-        condition: service_healthy
+  # backfill:
+  #   build: ./backfill
+  #   depends_on:
+  #     influxdb:
+  #       condition: service_healthy
       
 
   # plug-wizard:

@@ -13,6 +13,10 @@ class UserService {
   login(body: URLSearchParams) {
     return apiClient.post('/user/login', body);
   }
+
+  signup(body: URLSearchParams) {
+    return apiClient.post('/user/sign-up', body);
+  }
 }
 
 export const userService = new UserService();

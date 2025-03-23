@@ -48,7 +48,7 @@ cat << 'EOF' > /tmp/1d_aggregation.flux
 option task = {
     name: "1d_aggregation",
     cron: "0 0 * * *",
-    offset: 1m
+    offset: 5m
 }
 
 from(bucket: "1h-aggregated")

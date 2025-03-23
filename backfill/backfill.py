@@ -11,7 +11,7 @@ INTERVAL_SECONDS = 10
 PROCESS_START_TIME = time.time()
 
 END_DATE = datetime.now()
-START_DATE = END_DATE - timedelta(days=30)
+START_DATE = END_DATE - timedelta(days=28)
 
 logging.basicConfig(
     format="%(asctime)s %(message)s",

@@ -62,6 +62,7 @@ const OverviewChart: React.FC<OverviewChartProps> = ({ overviewChartData }) => {
             <XAxis
               dataKey="date"
               minTickGap={32}
+              reversed={true} //TODO: This is a patch for bar ordering
               tickFormatter={(value) => {
                 const date = new Date(value);
                 return date.toLocaleDateString('en-UK', {

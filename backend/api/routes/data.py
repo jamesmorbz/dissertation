@@ -161,7 +161,36 @@ def get_weekly_total(
         results.append(result)
 
     if len(results) != 2:
-        raise HTTPException(status_code=412, detail=f"No Weekly Comparison Data Found")
+        return get_daily_total(influx_client)
+
+    return results
+
+
+@router.get(
+    "/daily-total",
+    response_model=List[WeeklySummary],
+    tags=["All Devices", "Summary"],
+    summary="Last 2 Days in Daily Total Chunks",
+)
+def get_daily_total(
+    influx_client: InfluxDBClient = Depends(influxdb_client_dependency),
+):
+    query = InfluxDBQueries.get_daily_summary_query()
+    response: TableList = InfluxHelper.query_influx(influx_client, query)
+    fields = ["_value", "_start", "_stop"]
+    rows = InfluxHelper.convert_resp_to_dict(response, fields)
+
+    results = []
+    for row in rows:
+        result = {
+            "total": row["_value"],
+            "start": datetime.fromisoformat(row["_start"]).strftime("%d %b"),
+            "stop": datetime.fromisoformat(row["_stop"]).strftime("%d %b"),
+        }
+        results.append(result)
+
+    if len(results) != 2:
+        raise HTTPException(status_code=412, detail=f"No Daily Comparison Data Found")
 
     return results
 
@@ -226,4 +255,6 @@ def get_daily_data(
         else:
             data[device_name]["data"].append(data_point)
 
-    return list(data.values())
+    results = list(data.values())
+
+    return results
