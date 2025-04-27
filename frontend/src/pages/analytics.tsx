@@ -34,7 +34,7 @@ export function Analytics() {
     },
   ];
 
-  const [filteredDevices, setFilteredDevices] = useState<Device[]>(devices);
+  const [filteredDevices] = useState<Device[]>(devices);
 
   const usageData = Array.from(
     { length: 24 },

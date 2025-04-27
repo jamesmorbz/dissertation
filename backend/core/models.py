@@ -11,9 +11,11 @@ from sqlalchemy import (
     event,
 )
 from sqlalchemy.sql import func
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, declarative_base
 from sqlalchemy.orm.state import InstanceState
+
+import warnings
+from sqlalchemy import exc as sa_exc
 
 Base = declarative_base()
 
@@ -33,7 +35,9 @@ class User(Base):
     active = Column(Boolean, nullable=False, default=True)
     last_login = Column(TIMESTAMP)
     created_at = Column(TIMESTAMP, nullable=False, default=func.now())
-    updated_at = Column(TIMESTAMP, nullable=False, default=func.now())
+    updated_at = Column(
+        TIMESTAMP, nullable=False, default=func.now(), onupdate=func.now()
+    )
 
 
 @event.listens_for(User, "before_update")
@@ -135,7 +139,9 @@ def create_audit_log(
         device=device,
         action_type=action_type,
     )
-    session.add(audit_entry)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=sa_exc.SAWarning)
+        session.add(audit_entry)
 
 
 @event.listens_for(DeviceMapping, "before_update")

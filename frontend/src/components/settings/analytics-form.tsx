@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 import { useForm } from 'react-hook-form';
 
 export const AnalyticsForm = () => {
-  const [selectedLocation, setSelectedLocation] = useState('');
+  const [selectedLocation] = useState('');
 
   const form = useForm({
     defaultValues: {
@@ -32,12 +32,12 @@ export const AnalyticsForm = () => {
 
   const watchProvider = form.watch('energyProvider');
 
-  function handleLocationSelect(location: string) {
-    setSelectedLocation(location);
-    form.setValue('location', location);
-  }
+  // function handleLocationSelect(location: string) {
+  //   setSelectedLocation(location);
+  //   form.setValue('location', location);
+  // }
 
-  function onSubmit(data) {
+  function onSubmit(data: unknown) {
     console.log('Analytics data submitted:', data);
   }
 
