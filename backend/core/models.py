@@ -90,7 +90,7 @@ class Audit(Base):
     log = Column(Text, nullable=False)
     details = Column(Text, nullable=True)
     device = Column(String(32))
-    action_type = Column(String(16))
+    action_type = Column(String(32))
 
 
 class AutomationRule(Base):

@@ -47,14 +47,5 @@ export const carbonIntensityIndex = [
 ] as const;
 export type carbonIntensityIndex = (typeof carbonIntensityIndex)[number];
 
-export const timeRanges = [
-  '1H',
-  '3H',
-  '6H',
-  '12H',
-  '24H',
-  '7D',
-  '14D',
-  '30D',
-] as const;
+export const timeRanges = ['1D', '7D', '14D', '30D'] as const;
 export type Lookback = (typeof timeRanges)[number];

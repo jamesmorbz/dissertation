@@ -1,4 +1,4 @@
-url: http://influxdb:8086
+url: http://localhost:8086
 token: my-secret-token # Test Creds
 org: diss
 debug: false

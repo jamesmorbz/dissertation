@@ -7,6 +7,7 @@ from utils.user import get_current_user
 import json
 from pydantic import BaseModel, Field
 from fastapi_cache.decorator import cache
+from datetime import datetime, timezone, timedelta
 
 router = APIRouter()
 
@@ -57,7 +58,35 @@ def carbon_intensity(
     summary="Show future carbon intensity forecast from now to now + 72 hours",
 )
 def forecast(
-    hardware_name: str,
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    return "Filler"
+    now = datetime.now(timezone.utc)
+    datetime_now = now.strftime("%Y-%m-%dT%H:%MZ")
+    response = requests.get(
+        f"https://api.carbonintensity.org.uk/intensity/{datetime_now}/fw48h"
+    )
+    data = json.loads(response.content)["data"]
+    output = [{item["from"]: item["intensity"]["forecast"]} for item in data]
+
+    return output
+
+
+@router.get(
+    "/carbon-intensity/historical-values/{lookback_days}",
+    summary="Show historical carbon intensity values for the last X days",
+)
+def forecast(
+    lookback_days: int,
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    now = datetime.now(timezone.utc)
+    delta = datetime.now(timezone.utc) - timedelta(days=lookback_days)
+    datetime_now = now.strftime("%Y-%m-%dT%H:%MZ")
+    datetime_to = delta.strftime("%Y-%m-%dT%H:%MZ")
+    response = requests.get(
+        f"https://api.carbonintensity.org.uk/intensity/{datetime_to}/{datetime_now}"
+    )
+    data = json.loads(response.content)["data"]
+    output = [{item["from"]: item["intensity"]["forecast"]} for item in data]
+
+    return output
